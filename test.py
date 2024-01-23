@@ -26,14 +26,45 @@ def test_grain():
 
 
 def test_check_height():
-    grid_test = np.array([[0, 0, 0], 
-                         [0, 4, 0], 
-                         [0, 0, 0]])
-    grid_control_1 = np.array([[0, 0, 0], 
-                              [0, 0, 0], 
-                              [0, 0, 0]])
+    grid_test_1 = np.array([[0, 0, 0], 
+                            [0, 4, 0], 
+                            [0, 0, 0]])
+    grid_cont_1 = np.array([[0, 0, 0], 
+                            [0, 0, 0], 
+                            [0, 0, 0]])
+
+    grid_test_2 = np.array([[0, 0, 0, 0],
+                            [0, 4, 0, 0],
+                            [0, 0, 4, 0],
+                            [0, 0, 0, 0]])
+    grid_cont_2 = np.array([[0, 0, 0, 0],
+                            [0, 0, 2, 0],
+                            [0, 2, 0, 0],
+                            [0, 0, 0, 0]])
+
+    grid_test_3 = np.array([[0, 0, 0, 0,0],
+                            [0, 0, 0, 0,0],
+                            [0, 0, 4, 0,0],
+                            [0, 0, 0, 0,0],
+                            [0, 0, 0, 0,0]])
+    grid_cont_3 = np.array([[0, 0, 0, 0,0],
+                            [0, 0, 1, 0,0],
+                            [0, 1, 0, 1,0],
+                            [0, 0, 1, 0,0],
+                            [0, 0, 0, 0,0]])
+
 
     btw = BTW([3, 3], 4, 0)
-    btw.grid = grid_test
+    btw.grid = grid_test_1
     btw.check_height()
-    assert np.all(btw.grid == grid_control_1), f'Grid not correctly updated. \n {btw.grid} \n {grid_control_1}'
+    assert np.all(btw.grid == grid_cont_1), f'Grid not correctly updated. \n {btw.grid} \n {grid_cont_1}'
+
+    btw = BTW([4, 4], 4, 0)
+    btw.grid = grid_test_2
+    btw.check_height()
+    assert np.all(btw.grid == grid_cont_2), f'Grid not correctly updated. \n {btw.grid} \n {grid_cont_2}'
+
+    btw = BTW([5, 5], 4, 0)
+    btw.grid = grid_test_3
+    btw.check_height()
+    assert np.all(btw.grid == grid_cont_3), f'Grid not correctly updated. \n {btw.grid} \n {grid_cont_3}'
