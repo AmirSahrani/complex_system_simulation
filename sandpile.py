@@ -42,7 +42,7 @@ class BTW():
                 self.grid[self.grid.shape[0] // 2, self.grid.shape[1] // 2] += 1
                 self.check_height()
                 if self.visualize:
-                    self.plot(i)
+                    self.plot()
         elif method == "custom":
             self.grid = func(self.grid)
 
@@ -58,41 +58,41 @@ class BTW():
         Check if any points on the grid are over the critical height. 
         Any points on the edges "fall off" the grid.
         """
-        avalanche_duration = 0
         toppled = np.where(self.grid >= self.max_height)
-        while self.grid.max() >= self.max_height:
 
-            for location in zip(*toppled):
+        for location in zip(*toppled):
 
-                self.grid[location] -= self.max_height
-                self.grid[location[0] + 1, location[1]] += 1
-                self.grid[location[0] - 1, location[1]] += 1
-                self.grid[location[0], location[1] + 1] += 1
-                self.grid[location[0], location[1] - 1] += 1
+            self.grid[location] -= self.max_height
+            self.grid[location[0] + 1, location[1]] += 1
+            self.grid[location[0] - 1, location[1]] += 1
+            self.grid[location[0], location[1] + 1] += 1
+            self.grid[location[0], location[1] - 1] += 1
 
-            self.grid[0, :] = self.grid[-1, :] = self.grid[:, 0] = self.grid[:, -1] = 0 
+        self.grid[0, :] = self.grid[-1, :] = self.grid[:, 0] = self.grid[:, -1] = 0 
 
-            avalanche_duration += 1
-
-        if avalanche_duration > 0:
-            self.avalanches.append(avalanche_duration)
 
 
     def run(self, steps: int, start_iter: int=0) -> None:
         for i in range(steps):
             self.add_grain()
-            self.check_height()
-            if self.visualize:
-                self.plot(i + start_iter)
+            avalanche_duration = 0
+            
+            while self.grid.max() >= self.max_height:
+                self.check_height()
+                if self.visualize:
+                    self.plot()
+                avalanche_duration += 1
+
+                if avalanche_duration > 0:
+                    self.avalanches.append(avalanche_duration)
 
     def setup_plot(self) -> None:
         self.fig, self.ax = plt.subplots()
         self.fig.colorbar(plt.cm.ScalarMappable(cmap=self.cm), ax=self.ax)
 
 
-    def plot(self, step: int) -> None:
+    def plot(self) -> None:
         self.ax.imshow(self.grid, cmap=self.cm)
-        self.ax.set_title(f"Step {step}")
         plt.pause(0.001)
         self.ax.clear()
 
@@ -101,4 +101,4 @@ class BTW():
 if __name__ == "__main__":
     btw = BTW(grid_size=[10, 10], height=10, offset=0, visualize=True)
     btw.init_grid("center", 5)
-    btw.run(1000, 0)
+    btw.run(10000, 0)
