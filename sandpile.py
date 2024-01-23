@@ -36,7 +36,10 @@ class BTW():
 
         grid_points = (np.random.randint(0, self.grid.shape[0], size=(N)), np.random.randint(0, self.grid.shape[0], size=(N)))
         if method == "random":
-            self.grid[*grid_points] += np.random.randint(self.max_height)
+            for i in range(N):
+                point = (grid_points[0][i], grid_points[1][i])
+                self.grid[point] += np.random.randint(self.max_height)
+            # self.grid[*grid_points] += np.random.randint(self.max_height)
         elif method == "center":
             for i in range(N):
                 self.grid[self.grid.shape[0] // 2, self.grid.shape[1] // 2] += 1
@@ -49,7 +52,7 @@ class BTW():
     
     def add_grain(self) -> None:
         """Add a grain to a random point on the grid."""
-        grid_point = (np.random.randint(0, self.grid.shape[0]), np.random.randint(0, self.grid.shape[0]))
+        grid_point = (np.random.randint(0, self.grid.shape[0]), np.random.randint(0, self.grid.shape[1]))
         self.grid[grid_point] += 1
 
 
@@ -99,6 +102,6 @@ class BTW():
 
 
 if __name__ == "__main__":
-    btw = BTW(grid_size=[10, 10], height=10, offset=0, visualize=True)
+    btw = BTW(grid_size=[31, 31], height=4, offset=0, visualize=True)
     btw.init_grid("center", 5)
     btw.run(10000, 0)
