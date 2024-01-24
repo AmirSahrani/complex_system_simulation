@@ -15,7 +15,8 @@ class BTW():
         self.visualize = visualize
         self.refractory_period = 3
         self.refractory_matrix = np.zeros(grid_size)
-        self.avalanches = []
+        self.avalanches_sizes = []
+        self.avalanches_durations = []
 
         self.cm = plt.get_cmap("viridis", self.max_height + 1)
         self.setup_plot()
@@ -108,11 +109,11 @@ class BTW():
 
 
     def write_data(self) -> None:
-        '''Writes data to file'''
-        # TODO: Make it so this function doesn't overwrite anything
-        with open("data/avalanches.txt", "w") as f:
-            f.write(",".join([str(i) for i in self.avalanches]))
-
+        '''Writes self.avalanches_sizes and self_avalanches_durations to one csv file'''
+        with open("data/avalanches.csv", "w") as f:
+            f.write("size,duration\n")
+            for size, duration in zip(self.avalanches_sizes, self.avalanches_durations):
+                f.write(f"{size},{duration}\n")
 
 
 
