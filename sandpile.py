@@ -40,6 +40,7 @@ class BTW():
                 point = (grid_points[0][i], grid_points[1][i])
                 self.grid[point] += np.random.randint(self.max_height)
             # self.grid[*grid_points] += np.random.randint(self.max_height)
+            self.grid[grid_points[0], grid_points[1]] += np.random.randint(self.max_height)
         elif method == "center":
             for i in range(N):
                 self.grid[self.grid.shape[0] // 2, self.grid.shape[1] // 2] += 1
@@ -75,9 +76,10 @@ class BTW():
 
 
 
-    def run(self, steps: int, start_iter: int=0) -> None:
+    def run(self, steps: int) -> None:
         for i in range(steps):
             self.add_grain()
+
             avalanche_duration = 0
             
             while self.grid.max() >= self.max_height:
@@ -86,8 +88,8 @@ class BTW():
                     self.plot()
                 avalanche_duration += 1
 
-                if avalanche_duration > 0:
-                    self.avalanches.append(avalanche_duration)
+            if avalanche_duration > 0:
+                self.avalanches.append(avalanche_duration)
 
     def setup_plot(self) -> None:
         self.fig, self.ax = plt.subplots()
@@ -102,6 +104,8 @@ class BTW():
 
 
 if __name__ == "__main__":
-    btw = BTW(grid_size=[31, 31], height=4, offset=0, visualize=True)
-    btw.init_grid("center", 5)
-    btw.run(10000, 0)
+    btw = BTW(grid_size=[100, 100], height=4, offset=2, visualize=False)
+    btw.init_grid("random", 5)
+    btw.run(10000)
+    with open("data/avalanches.txt", "w") as f:
+        f.write(",".join([str(i) for i in btw.avalanches]))
