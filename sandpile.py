@@ -36,10 +36,6 @@ class BTW():
 
         grid_points = (np.random.randint(0, self.grid.shape[0], size=(N)), np.random.randint(0, self.grid.shape[0], size=(N)))
         if method == "random":
-            for i in range(N):
-                point = (grid_points[0][i], grid_points[1][i])
-                self.grid[point] += np.random.randint(self.max_height)
-            # self.grid[*grid_points] += np.random.randint(self.max_height)
             self.grid[grid_points[0], grid_points[1]] += np.random.randint(self.max_height)
         elif method == "center":
             for i in range(N):
