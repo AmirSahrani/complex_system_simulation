@@ -1,4 +1,5 @@
 from sandpile import BTW
+from utils.data_utils import *
 import numpy as np
 
 
