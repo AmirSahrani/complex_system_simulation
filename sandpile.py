@@ -7,16 +7,17 @@ class BTW():
     """Bak-Tang-Wiesenfeld sandpile model.
     Initialize with a grid size, model will be initialized with all zeros.
     """
-    def __init__(self, grid_size :List,  height: int, offset: int, visualize: bool=False, max_distance: int=1) -> None:
+    def __init__(self, grid_size: List, height: int, offset: int, visualize: bool=False, max_distance: int=1, refractory_period: int=3, probability_of_spontaneous_activity: float=0.01) -> None:
         self.grid = np.zeros(grid_size) + offset
         self.max_height = height
         self.offset = offset
         self.direction = []
         self.visualize = visualize
-        self.refractory_period = 3
+        self.refractory_period = refractory_period
         self.refractory_matrix = np.zeros(grid_size)
         self.avalanches_sizes = []
         self.avalanches_durations = []
+        self.probability_of_spontaneous_activity = probability_of_spontaneous_activity
 
         self.cm = plt.get_cmap("viridis", self.max_height + 1)
         self.setup_plot()
@@ -39,7 +40,7 @@ class BTW():
 
         grid_points = (np.random.randint(0, self.grid.shape[0], size=(N)), np.random.randint(0, self.grid.shape[0], size=(N)))
         if method == "random":
-            self.grid[grid_points[0], grid_points[1]] += np.random.randint(self.max_height)
+            self.grid[grid_points[0], grid_points[1]] = self.max_height
         elif method == "center":
             for i in range(N):
                 self.grid[self.grid.shape[0] // 2, self.grid.shape[1] // 2] += 1
@@ -52,9 +53,13 @@ class BTW():
     
     def add_grain(self) -> None:
         """Add a grain to a random point on the grid."""
-        #TODO: make it so this function activates neurons like the book/paper says
-        grid_point = (np.random.randint(0, self.grid.shape[0]), np.random.randint(0, self.grid.shape[1]))
-        self.grid[grid_point] += 1
+        # Loop through all neurons in the grid
+        # Check neurons not in the refractory period
+        not_in_ref = self.refractory_matrix == 0
+        # Randomly activate neurons based on probability
+        add_matrix = np.random.random(self.grid.shape) < self.probability_of_spontaneous_activity
+        # Activate neurons that are not in refractory and have been randomly chosen
+        self.grid[not_in_ref & add_matrix] = self.max_height
 
     def neighbormap(self, max_distance) -> None:
         for x in range(-max_distance, max_distance+1):
@@ -67,20 +72,23 @@ class BTW():
         Check if any points on the grid are over the critical height. 
         Any points on the edges "fall off" the grid.
         """
-        #TODO: Make this function check neighbors according to the rules in the book/paper
         toppled = np.where(self.grid >= self.max_height)
 
         for location in zip(*toppled):
             self.grid[location] = 0
-            self.refractory_matrix[location] = self.refractory_period
+            self.refractory_matrix[location] = self.refractory_period + 1
             for d in self.direction:
                 x, y = location[0] + d[0], location[1] + d[1]
                 if x >= 0 and x < self.grid.shape[0] and y >= 0 and y < self.grid.shape[1] and self.refractory_matrix[x, y] == 0:
                     self.grid[x, y] += 1
+        self.grid = self.grid >= self.max_height
+        self.grid = self.grid.astype(int) * self.max_height
 
 
     def run(self, steps: int) -> None:
-        #TODO: Add docstring and tweak it so it works with the new check_neighbors function
+        """
+        Run the model for a number of steps.
+        """
         #TODO: Revise avalanche size/duration counting
 
         for i in range(steps):
@@ -96,6 +104,8 @@ class BTW():
 
             if avalanche_duration > 0:
                 self.avalanches.append(avalanche_duration)
+
+            self.refractory_matrix[self.refractory_matrix > 0] -= 1
 
     def setup_plot(self) -> None:
         self.fig, self.ax = plt.subplots()
@@ -116,8 +126,7 @@ class BTW():
                 f.write(f"{size},{duration}\n")
 
 
-
 if __name__ == "__main__":
-    btw = BTW(grid_size=[100, 100], height=4, offset=2, visualize=False)
+    btw = BTW(grid_size=[100, 100], height=4, offset=2, visualize=True)
     btw.init_grid("random", 5)
     btw.run(10000)
