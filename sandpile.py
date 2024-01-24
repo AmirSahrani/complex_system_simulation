@@ -49,15 +49,17 @@ class BTW():
     
     def add_grain(self) -> None:
         """Add a grain to a random point on the grid."""
+        #TODO: make it so this function activates neurons like the book/paper says
         grid_point = (np.random.randint(0, self.grid.shape[0]), np.random.randint(0, self.grid.shape[1]))
         self.grid[grid_point] += 1
 
 
-    def check_height(self) -> None:
+    def check_neighbors(self, n_neighbors: int) -> None:
         """
         Check if any points on the grid are over the critical height. 
         Any points on the edges "fall off" the grid.
         """
+        #TODO: Make this function check neighbors according to the rules in the book/paper
         toppled = np.where(self.grid >= self.max_height)
 
         for location in zip(*toppled):
@@ -73,6 +75,9 @@ class BTW():
 
 
     def run(self, steps: int) -> None:
+        #TODO: Add docstring and tweak it so it works with the new check_neighbors function
+        #TODO: Revise avalanche size/duration counting
+
         for i in range(steps):
             self.add_grain()
 
@@ -98,10 +103,16 @@ class BTW():
         self.ax.clear()
 
 
+    def write_data(self) -> None:
+        '''Writes data to file'''
+        # TODO: Make it so this function doesn't overwrite anything
+        with open("data/avalanches.txt", "w") as f:
+            f.write(",".join([str(i) for i in self.avalanches]))
+
+
+
 
 if __name__ == "__main__":
     btw = BTW(grid_size=[100, 100], height=4, offset=2, visualize=False)
     btw.init_grid("random", 5)
     btw.run(10000)
-    with open("data/avalanches.txt", "w") as f:
-        f.write(",".join([str(i) for i in btw.avalanches]))
