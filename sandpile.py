@@ -7,10 +7,9 @@ class BTW():
     """Bak-Tang-Wiesenfeld sandpile model.
     Initialize with a grid size, model will be initialized with all zeros.
     """
-    def __init__(self, grid_size: List, height: int, offset: int, visualize: bool=False, max_distance: int=1, refractory_period: int=3, probability_of_spontaneous_activity: float=0.01) -> None:
-        self.grid = np.zeros(grid_size) + offset
+    def __init__(self, grid_size: List, height: int, visualize: bool=False, max_distance: int=3, refractory_period: int=3, probability_of_spontaneous_activity: float=0.02) -> None:
+        self.grid = np.zeros(grid_size)
         self.max_height = height
-        self.offset = offset
         self.direction = []
         self.visualize = visualize
         self.refractory_period = refractory_period
@@ -35,27 +34,27 @@ class BTW():
         assert method in ["random", "center", "custom"], "Invalid method."
         assert N > 0, "N must be positive."
 
-        if any(sum(self.grid-self.offset)):
-            self.grid = np.zeros(self.grid.shape) + self.offset
+        if any(sum(self.grid)):
+            self.grid = np.zeros(self.grid.shape)
 
         grid_points = (np.random.randint(0, self.grid.shape[0], size=(N)), np.random.randint(0, self.grid.shape[0], size=(N)))
         if method == "random":
             self.grid[grid_points[0], grid_points[1]] = self.max_height
         elif method == "center":
             for i in range(N):
-                self.grid[self.grid.shape[0] // 2, self.grid.shape[1] // 2] += 1
+                self.grid[self.grid.shape[0] // 2, self.grid.shape[1] // 2] = self.max_height
                 self.check_neighbors()
                 if self.visualize:
                     self.plot()
         elif method == "custom":
             self.grid = func(self.grid)
 
+
     def calculate_avalanch_size(self):
-
-
-
+        pass
     
-    def (self) -> None:
+
+    def add_grain(self) -> None:
         """Add a grain to a random point on the grid."""
         # Loop through all neurons in the grid
         # Check neurons not in the refractory period
@@ -65,11 +64,13 @@ class BTW():
         # Activate neurons that are not in refractory and have been randomly chosen
         self.grid[not_in_ref & add_matrix] = self.max_height
 
+
     def neighbormap(self, max_distance) -> None:
         for x in range(-max_distance, max_distance+1):
             for y in range(-max_distance, max_distance+1):
                 if abs(x)**2 + abs(y)**2 <= max_distance**2 and (x, y) != (0, 0):
                     self.direction.append((x, y))
+
 
     def check_neighbors(self) -> None:
         """
@@ -131,6 +132,7 @@ class BTW():
 
             self.refractory_matrix[self.refractory_matrix > 0] -= 1
 
+
     def setup_plot(self) -> None:
         self.fig, self.ax = plt.subplots()
         self.fig.colorbar(plt.cm.ScalarMappable(cmap=self.cm), ax=self.ax)
@@ -151,6 +153,6 @@ class BTW():
 
 
 if __name__ == "__main__":
-    btw = BTW(grid_size=[100, 100], height=4, offset=2, visualize=True)
+    btw = BTW(grid_size=[21, 21], height=4, refractory_period=5, max_distance=3, visualize=True)
     btw.init_grid("random", 5)
     btw.run(10000)
