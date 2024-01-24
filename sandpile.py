@@ -59,7 +59,6 @@ class BTW():
         add_matrix = np.random.random(self.grid.shape) < self.probability_of_spontaneous_activity
         # Activate neurons that are not in refractory and have been randomly chosen
         self.grid[not_in_ref & add_matrix] = self.max_height
-    
 
     def neighbormap(self, max_distance) -> None:
         for x in range(-max_distance, max_distance+1):
