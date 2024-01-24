@@ -26,46 +26,48 @@ def test_grain():
     assert np.sum(btw.grid) == 1
 
 
-def test_check_height():
+def test_check_neighbors():
     grid_test_1 = np.array([[0, 0, 0], 
                             [0, 4, 0], 
                             [0, 0, 0]])
-    grid_cont_1 = np.array([[0, 0, 0], 
-                            [0, 0, 0], 
-                            [0, 0, 0]])
+    grid_cont_1 = np.array([[1, 1, 1], 
+                            [1, 0, 1], 
+                            [1, 1, 1]])
 
     grid_test_2 = np.array([[0, 0, 0, 0],
                             [0, 4, 0, 0],
                             [0, 0, 4, 0],
                             [0, 0, 0, 0]])
-    grid_cont_2 = np.array([[0, 0, 0, 0],
-                            [0, 0, 2, 0],
-                            [0, 2, 0, 0],
-                            [0, 0, 0, 0]])
+    grid_cont_2 = np.array([[2, 2, 2, 2],
+                            [2, 0, 2, 2],
+                            [2, 2, 0, 2],
+                            [2, 2, 2, 2]])
 
-    grid_test_3 = np.array([[0, 0, 0, 0,0],
-                            [0, 0, 0, 0,0],
-                            [0, 0, 4, 0,0],
-                            [0, 0, 0, 0,0],
-                            [0, 0, 0, 0,0]])
-    grid_cont_3 = np.array([[0, 0, 0, 0,0],
-                            [0, 0, 1, 0,0],
-                            [0, 1, 0, 1,0],
-                            [0, 0, 1, 0,0],
-                            [0, 0, 0, 0,0]])
+    grid_test_3 = np.array([[0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0],
+                            [0, 0, 4, 0, 0],
+                            [0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0]])
+    grid_cont_3 = np.array([[1, 1, 1, 1, 1],
+                            [1, 1, 1, 1, 1],
+                            [1, 1, 0, 1, 1],
+                            [1, 1, 1, 1, 1],
+                            [1, 1, 1, 1, 1]])
 
 
-    btw = BTW([3, 3], 4, 0)
-    btw.grid = grid_test_1
-    btw.check_height()
-    assert np.all(btw.grid == grid_cont_1), f'Grid not correctly updated. \n {btw.grid} \n {grid_cont_1}'
 
-    btw = BTW([4, 4], 4, 0)
-    btw.grid = grid_test_2
-    btw.check_height()
-    assert np.all(btw.grid == grid_cont_2), f'Grid not correctly updated. \n {btw.grid} \n {grid_cont_2}'
+    for i, (test, control) in enumerate(zip([grid_test_1, grid_test_2, grid_test_3], [grid_cont_1, grid_cont_2, grid_cont_3]), start=3):
+        btw = BTW([i, i], 4, 0, max_distance=3)
+        btw.grid = test
+        btw.check_neighbors()
+        assert np.all(btw.grid == control), f'Grid not correctly updated. \n {btw.grid} \n {control}'
 
-    btw = BTW([5, 5], 4, 0)
-    btw.grid = grid_test_3
-    btw.check_height()
-    assert np.all(btw.grid == grid_cont_3), f'Grid not correctly updated. \n {btw.grid} \n {grid_cont_3}'
+    # btw = BTW([4, 4], 4, 0)
+    # btw.grid = grid_test_2
+    # btw.check_neighbors()
+    # assert np.all(btw.grid == grid_cont_2), f'Grid not correctly updated. \n {btw.grid} \n {grid_cont_2}'
+
+    # btw = BTW([5, 5], 4, 0)
+    # btw.grid = grid_test_3
+    # btw.check_neighbors()
+    # assert np.all(btw.grid == grid_cont_3), f'Grid not correctly updated. \n {btw.grid} \n {grid_cont_3}'
