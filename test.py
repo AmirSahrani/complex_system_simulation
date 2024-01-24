@@ -1,6 +1,8 @@
 from sandpile import BTW
 from utils.data_utils import *
 import numpy as np
+import os
+import csv
 
 
 def test_init_grid():
@@ -24,6 +26,35 @@ def test_grain():
     btw = BTW([3, 3], 4, 0)
     btw.add_grain()
     assert np.sum(btw.grid) == 1
+
+
+def test_writing():
+    # Create an instance of the BTW class
+    btw = BTW([10, 10], 4, 0)
+    # Initialize the grid
+    btw.init_grid("random", 5)
+    # Initialize the BTW class with durations and sizes
+    btw.avalanches_sizes = [1, 2, 3]
+    btw.avalanches_durations = [1, 2, 3]
+    # Write the grid to a file
+    btw.write_data()
+    # Read the csv data
+    with open("data/avalanches.csv", "r") as f:
+        reader = csv.reader(f)
+        next(reader)  # Skip the header
+        data_read = [(int(size), int(duration)) for size, duration in reader]
+
+    # Prepare expected data for comparison
+    expected_data = list(zip(btw.avalanches_sizes, btw.avalanches_durations))
+
+    # Check if the data is correct
+    assert data_read == expected_data
+
+
+
+
+
+
 
 
 def test_check_neighbors():
