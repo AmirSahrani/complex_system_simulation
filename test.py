@@ -1,6 +1,8 @@
 from sandpile import BTW
 from utils.data_utils import *
 import numpy as np
+import os
+import csv
 
 
 def test_init_grid():
@@ -26,40 +28,70 @@ def test_grain():
     assert np.sum(btw.grid) == 1
 
 
+def test_writing():
+    # Create an instance of the BTW class
+    btw = BTW([10, 10], 4, 0)
+    # Initialize the grid
+    btw.init_grid("random", 5)
+    # Initialize the BTW class with durations and sizes
+    btw.avalanches_sizes = [1, 2, 3]
+    btw.avalanches_durations = [1, 2, 3]
+    # Write the grid to a file
+    btw.write_data()
+    # Read the csv data
+    with open("data/avalanches.csv", "r") as f:
+        reader = csv.reader(f)
+        next(reader)  # Skip the header
+        data_read = [(int(size), int(duration)) for size, duration in reader]
+
+    # Prepare expected data for comparison
+    expected_data = list(zip(btw.avalanches_sizes, btw.avalanches_durations))
+
+    # Check if the data is correct
+    assert data_read == expected_data
+
+
+
+
+
+
+
+
 def test_check_neighbors():
-    grid_test_1 = np.array([[0, 0, 0], 
-                            [0, 4, 0], 
-                            [0, 0, 0]])
-    grid_cont_1 = np.array([[1, 1, 1], 
-                            [1, 0, 1], 
-                            [1, 1, 1]])
+    grid_test_1 = np.array([[4, 0, 4], 
+                            [0, 0, 0], 
+                            [4, 0, 4]])
+    grid_cont_1 = np.array([[0, 4, 0], 
+                            [4, 4, 4], 
+                            [0, 4, 0]])
 
-    grid_test_2 = np.array([[0, 0, 0, 0],
-                            [0, 4, 0, 0],
-                            [0, 0, 4, 0],
-                            [0, 0, 0, 0]])
-    grid_cont_2 = np.array([[2, 2, 2, 2],
-                            [2, 0, 2, 2],
-                            [2, 2, 0, 2],
-                            [2, 2, 2, 2]])
+    grid_test_2 = np.array([[4, 0, 4, 0],
+                            [0, 4, 0, 4],
+                            [4, 0, 4, 0],
+                            [0, 4, 0, 4]])
+    grid_cont_2 = np.array([[0, 4, 0, 4],
+                            [4, 0, 4, 0],
+                            [0, 4, 0, 4],
+                            [4, 0, 4, 0]])
 
-    grid_test_3 = np.array([[0, 0, 0, 0, 0],
+    grid_test_3 = np.array([[4, 0, 0, 0, 4],
+                            [0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0],
+                            [4, 0, 0, 0, 4]])
+    grid_cont_3 = np.array([[0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0],
                             [0, 0, 4, 0, 0],
                             [0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0]])
-    grid_cont_3 = np.array([[1, 1, 1, 1, 1],
-                            [1, 1, 1, 1, 1],
-                            [1, 1, 0, 1, 1],
-                            [1, 1, 1, 1, 1],
-                            [1, 1, 1, 1, 1]])
 
 
 
     for i, (test, control) in enumerate(zip([grid_test_1, grid_test_2, grid_test_3], [grid_cont_1, grid_cont_2, grid_cont_3]), start=3):
-        btw = BTW([i, i], 4, 0, max_distance=3)
+        btw = BTW([i, i], height=4, offset=0, max_distance=3)
         btw.grid = test
         btw.check_neighbors()
+        print(btw.grid)
         assert np.all(btw.grid == control), f'Grid not correctly updated. \n {btw.grid} \n {control}'
 
     # btw = BTW([4, 4], 4, 0)
