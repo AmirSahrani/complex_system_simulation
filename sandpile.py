@@ -49,8 +49,12 @@ class BTW():
         elif method == "custom":
             self.grid = func(self.grid)
 
+    def calculate_avalanch_size(self):
+
+
+
     
-    def add_grain(self) -> None:
+    def (self) -> None:
         """Add a grain to a random point on the grid."""
         # TODO: make it so this function activates neurons like the book/paper says
         # Loop through all neurons in the grid
@@ -88,13 +92,33 @@ class BTW():
         #TODO: Add docstring and tweak it so it works with the new check_neighbors function
         #TODO: Revise avalanche size/duration counting
 
+        # Initialize a list to store the size of each avalanche
+        
+
         for i in range(steps):
+            # Initialize a variable for the current avalanche size
+            avalanche_sizes = []
+            current_avalanche_size = 0
+
+            # Save the current state of the gride before adding grains
+            prev_grid_state = np.copy(self.grid)
+
             self.add_grain()
 
             avalanche_duration = 0
             
             while self.grid.max() >= self.max_height:
                 self.check_neighbors()
+
+                # Count the number of neurons activated at this step
+                # and add it to the current avalanche size
+                newly_activated = (self.grid > prev_grid_state) & (prev_grid_state < self.max_height)
+                current_avalanche_size += np.sum(newly_activated)
+
+                # Record the current avalanche size if it's greater than 0
+                if current_avalanche_size > 0:
+                    avalanche_sizes.append(current_avalanche_size)
+
                 if self.visualize:
                     self.plot()
                 avalanche_duration += 1
