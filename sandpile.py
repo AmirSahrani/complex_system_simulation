@@ -152,6 +152,6 @@ class BTW():
 
 
 if __name__ == "__main__":
-    btw = BTW(grid_size=[21, 21], height=5, refractory_period=3, probability_of_spontaneous_activity=0.03, max_distance=3, visualize=True)
+    btw = BTW(grid_size=[21, 21], height=4, refractory_period=2, probability_of_spontaneous_activity=0.02, max_distance=3, visualize=True)
     btw.init_grid("random", 4)
     btw.run(10000)

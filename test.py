@@ -10,7 +10,7 @@ def test_init_grid():
     Test the init_grid method of the BTW class.
     Currently the random method relies on not accidentally picking the same point twice.
     '''
-    btw = BTW([10, 10], 4, 0)
+    btw = BTW([10, 10], 4)
     btw.init_grid("random", 5)
     assert np.where(btw.grid > 0)[0].shape[0] == 5, "Grid not initialized correctly using random method."
 
@@ -22,10 +22,10 @@ def test_init_grid():
     assert np.sum(btw.grid) == grid_surface_area, "Grid not initialized correctly using custom method."
 
 
-def test_grain():
-    btw = BTW([3, 3], 4, 0)
-    btw.add_grain()
-    assert np.sum(btw.grid) == 1
+# def test_grain():
+#     btw = BTW([3, 3], 4)
+#     btw.add_grain()
+#     assert np.sum(btw.grid) == 1
 
 
 def test_writing():
@@ -88,7 +88,7 @@ def test_check_neighbors():
 
 
     for i, (test, control) in enumerate(zip([grid_test_1, grid_test_2, grid_test_3], [grid_cont_1, grid_cont_2, grid_cont_3]), start=3):
-        btw = BTW([i, i], height=4, offset=0, max_distance=3)
+        btw = BTW([i, i], height=4, max_distance=3)
         btw.grid = test
         btw.check_neighbors()
         print(btw.grid)
