@@ -7,17 +7,20 @@ class BTW():
     """Bak-Tang-Wiesenfeld sandpile model.
     Initialize with a grid size, model will be initialized with all zeros.
     """
-    def __init__(self, grid_size :List,  height: int, offset: int, visualize: bool=False) -> None:
+    def __init__(self, grid_size :List,  height: int, offset: int, visualize: bool=False, max_distance: int=1) -> None:
         self.grid = np.zeros(grid_size) + offset
         self.max_height = height
         self.offset = offset
-        self.direction = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        self.direction = []
         self.visualize = visualize
-
+        self.refractory_period = 3
+        self.refractory_matrix = np.zeros(grid_size)
+        self.probability_of_spontaneous_activity = 0.02
         self.avalanches = []
 
         self.cm = plt.get_cmap("viridis", self.max_height + 1)
         self.setup_plot()
+        self.neighbormap(max_distance)
 
 
     def init_grid(self, method: str, N: Optional[int], func: Optional[callable] = None) -> None:
@@ -40,7 +43,7 @@ class BTW():
         elif method == "center":
             for i in range(N):
                 self.grid[self.grid.shape[0] // 2, self.grid.shape[1] // 2] += 1
-                self.check_height()
+                self.check_neighbors()
                 if self.visualize:
                     self.plot()
         elif method == "custom":
@@ -49,12 +52,24 @@ class BTW():
     
     def add_grain(self) -> None:
         """Add a grain to a random point on the grid."""
-        #TODO: make it so this function activates neurons like the book/paper says
-        grid_point = (np.random.randint(0, self.grid.shape[0]), np.random.randint(0, self.grid.shape[1]))
-        self.grid[grid_point] += 1
+        # TODO: make it so this function activates neurons like the book/paper says
+        # Loop through all neurons in the grid
+        # Check neurons not in the refractory period
+        not_in_ref = self.refractory_matrix == 0
+        # Randomly activate neurons based on probability
+        add_matrix = np.random.random(self.grid.shape) < self.probability_of_spontaneous_activity
+        # Activate neurons that are not in refractory and have been randomly chosen
+        self.grid[not_in_ref & add_matrix] += 1
+        # Set the refractory period for newly activated neurons
+        self.refractory_matrix[not_in_ref & add_matrix] = self.refractory_period
 
+    def neighbormap(self, max_distance) -> None:
+        for x in range(-max_distance, max_distance+1):
+            for y in range(-max_distance, max_distance+1):
+                if abs(x)**2 + abs(y)**2 <= max_distance**2 and (x, y) != (0, 0):
+                    self.direction.append((x, y))
 
-    def check_neighbors(self, n_neighbors: int) -> None:
+    def check_neighbors(self) -> None:
         """
         Check if any points on the grid are over the critical height. 
         Any points on the edges "fall off" the grid.
@@ -63,15 +78,12 @@ class BTW():
         toppled = np.where(self.grid >= self.max_height)
 
         for location in zip(*toppled):
-
-            self.grid[location] -= self.max_height
-            self.grid[location[0] + 1, location[1]] += 1
-            self.grid[location[0] - 1, location[1]] += 1
-            self.grid[location[0], location[1] + 1] += 1
-            self.grid[location[0], location[1] - 1] += 1
-
-        self.grid[0, :] = self.grid[-1, :] = self.grid[:, 0] = self.grid[:, -1] = 0 
-
+            self.grid[location] = 0
+            self.refractory_matrix[location] = self.refractory_period
+            for d in self.direction:
+                x, y = location[0] + d[0], location[1] + d[1]
+                if x >= 0 and x < self.grid.shape[0] and y >= 0 and y < self.grid.shape[1] and self.refractory_matrix[x, y] == 0:
+                    self.grid[x, y] += 1
 
 
     def run(self, steps: int) -> None:
@@ -84,7 +96,7 @@ class BTW():
             avalanche_duration = 0
             
             while self.grid.max() >= self.max_height:
-                self.check_height()
+                self.check_neighbors()
                 if self.visualize:
                     self.plot()
                 avalanche_duration += 1
