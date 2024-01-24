@@ -49,7 +49,7 @@ class BTW():
     
     def add_grain(self) -> None:
         """Add a grain to a random point on the grid."""
-        grid_point = (np.random.randint(0, self.grid.shape[0]), np.random.randint(0, self.grid.shape[0]))
+        grid_point = (np.random.randint(0, self.grid.shape[0]), np.random.randint(0, self.grid.shape[1]))
         self.grid[grid_point] += 1
 
 
