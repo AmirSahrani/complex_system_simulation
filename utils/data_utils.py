@@ -1,10 +1,6 @@
-import matplotlib.pyplot as plt
-
-
-def power_law_plot(data):
-    """Plot a power law distribution."""
-    plt.hist(data, bins=len(data), log=True)
-    plt.xlabel("Avalanche duration")
-    plt.ylabel("Frequency")
-    plt.title("Avalanche duration distribution")
-    plt.show()
+def load_data(path: str) -> list:
+    """Load data from a file."""
+    with open(path, "r") as f:
+        data = f.readlines()[0]
+        data = [int(x.strip()) for x in data.split(",")]
+    return data
