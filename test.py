@@ -1,7 +1,6 @@
 from sandpile import BTW
 from utils.data_utils import *
 import numpy as np
-import os
 import csv
 
 
@@ -10,6 +9,7 @@ def test_init_grid():
     Test the init_grid method of the BTW class.
     Currently the random method relies on not accidentally picking the same point twice.
     '''
+    btw = BTW([10, 10], 4)
     btw = BTW([10, 10], 4)
     btw.init_grid("random", 5)
     assert np.where(btw.grid > 0)[0].shape[0] == 5, "Grid not initialized correctly using random method."
@@ -22,15 +22,14 @@ def test_init_grid():
     assert np.sum(btw.grid) == grid_surface_area, "Grid not initialized correctly using custom method."
 
 
-# def test_grain():
-#     btw = BTW([3, 3], 4)
-#     btw.add_grain()
-#     assert np.sum(btw.grid) == 1
+def test_grain():
+    btw = BTW([3, 3], 4)
+    btw.add_grain()
+    assert np.sum(btw.grid) == 1
 
 
 def test_writing():
-    # Create an instance of the BTW class
-    btw = BTW([10, 10], 4, 0)
+    btw = BTW([10, 10], 4)
     # Initialize the grid
     btw.init_grid("random", 5)
     # Initialize the BTW class with durations and sizes
@@ -49,12 +48,6 @@ def test_writing():
 
     # Check if the data is correct
     assert data_read == expected_data
-
-
-
-
-
-
 
 
 def test_check_neighbors():
@@ -93,13 +86,3 @@ def test_check_neighbors():
         btw.check_neighbors()
         print(btw.grid)
         assert np.all(btw.grid == control), f'Grid not correctly updated. \n {btw.grid} \n {control}'
-
-    # btw = BTW([4, 4], 4, 0)
-    # btw.grid = grid_test_2
-    # btw.check_neighbors()
-    # assert np.all(btw.grid == grid_cont_2), f'Grid not correctly updated. \n {btw.grid} \n {grid_cont_2}'
-
-    # btw = BTW([5, 5], 4, 0)
-    # btw.grid = grid_test_3
-    # btw.check_neighbors()
-    # assert np.all(btw.grid == grid_cont_3), f'Grid not correctly updated. \n {btw.grid} \n {grid_cont_3}'
