@@ -15,6 +15,7 @@ class BTW():
         self.visualize = visualize
         self.refractory_period = 3
         self.refractory_matrix = np.zeros(grid_size)
+        self.probability_of_spontaneous_activity = 0.02
         self.avalanches = []
 
         self.cm = plt.get_cmap("viridis", self.max_height + 1)
@@ -51,9 +52,16 @@ class BTW():
     
     def add_grain(self) -> None:
         """Add a grain to a random point on the grid."""
-        #TODO: make it so this function activates neurons like the book/paper says
-        grid_point = (np.random.randint(0, self.grid.shape[0]), np.random.randint(0, self.grid.shape[1]))
-        self.grid[grid_point] += 1
+        # TODO: make it so this function activates neurons like the book/paper says
+        # Loop through all neurons in the grid
+        # Check neurons not in the refractory period
+        not_in_ref = self.refractory_matrix == 0
+        # Randomly activate neurons based on probability
+        add_matrix = np.random.random(self.grid.shape) < self.probability_of_spontaneous_activity
+        # Activate neurons that are not in refractory and have been randomly chosen
+        self.grid[not_in_ref & add_matrix] += 1
+        # Set the refractory period for newly activated neurons
+        self.refractory_matrix[not_in_ref & add_matrix] = self.refractory_period
 
     def neighbormap(self, max_distance) -> None:
         for x in range(-max_distance, max_distance+1):
