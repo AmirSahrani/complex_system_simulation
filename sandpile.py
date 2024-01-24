@@ -101,7 +101,6 @@ class BTW():
 
         for i in range(steps):
             # Initialize a variable for the current avalanche size
-            avalanche_sizes = []
             current_avalanche_size = 0
 
             # Save the current state of the gride before adding grains
@@ -121,14 +120,14 @@ class BTW():
 
                 # Record the current avalanche size if it's greater than 0
                 if current_avalanche_size > 0:
-                    avalanche_sizes.append(current_avalanche_size)
+                    self.avalanches_sizes.append(current_avalanche_size)
 
                 if self.visualize:
                     self.plot()
                 avalanche_duration += 1
 
             if avalanche_duration > 0:
-                self.avalanches.append(avalanche_duration)
+                self.avalanches_durations.append(avalanche_duration)
 
             self.refractory_matrix[self.refractory_matrix > 0] -= 1
 
@@ -153,6 +152,6 @@ class BTW():
 
 
 if __name__ == "__main__":
-    btw = BTW(grid_size=[21, 21], height=4, refractory_period=5, max_distance=3, visualize=True)
-    btw.init_grid("random", 5)
+    btw = BTW(grid_size=[21, 21], height=5, refractory_period=3, probability_of_spontaneous_activity=0.03, max_distance=3, visualize=True)
+    btw.init_grid("random", 4)
     btw.run(10000)
