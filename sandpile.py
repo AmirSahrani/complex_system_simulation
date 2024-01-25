@@ -8,7 +8,7 @@ class BTW():
     """Bak-Tang-Wiesenfeld sandpile model.
     Initialize with a grid size, model will be initialized with all zeros.
     """
-    def __init__(self, grid_size: List, height: int, visualize: bool=False, max_distance: float=3, refractory_period: int=3, probability_of_spontaneous_activity: float=0.02, random_connection: bool=False) -> None:
+    def __init__(self, grid_size: List, height: int=3, visualize: bool=False, max_distance: float=3, refractory_period: int=3, probability_of_spontaneous_activity: float=0.02, random_connection: bool=False) -> None:
         self.grid = np.zeros(grid_size)
         self.max_height = height
         self.direction = []
@@ -127,10 +127,7 @@ class BTW():
         """
         Run the model for a number of steps.
         """
-        #TODO: Revise avalanche size/duration counting
-
-        # Initialize a list to store the size of each avalanche
-        
+        #TODO: Revise avalanche size/duration counting      
 
         for i in range(steps):
             # Initialize a variable for the current avalanche size
@@ -139,11 +136,11 @@ class BTW():
             # Save the current state of the gride before adding grains
             prev_grid_state = np.copy(self.grid)
 
-            self.add_grain()
-
             avalanche_duration = 0
 
             self.check_neighbors()
+
+            self.add_grain()
 
             # Count the number of neurons activated at this step
             # and add it to the current avalanche size
@@ -171,7 +168,7 @@ class BTW():
 
     def plot(self) -> None:
         self.ax.imshow(self.grid, cmap=self.cm)
-        plt.pause(0.001)
+        plt.pause(0.01)
         self.ax.clear()
 
 
@@ -184,6 +181,12 @@ class BTW():
 
 
 if __name__ == "__main__":
-    btw = BTW(grid_size=[21, 21], height=3, refractory_period=5, probability_of_spontaneous_activity=0.015, max_distance=2.5, visualize=True, random_connection=True)
+    kwargs_round_spiral = {"height": 4, "refractory_period": 5, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
+    kwargs_pulse_wave = {"height": 5, "refractory_period": 4, "probability_of_spontaneous_activity": 0.03, "max_distance": 3, "visualize": True, "random_connection": False}
+    kwargs_synchronous = {"height": 3, "refractory_period": 5, "probability_of_spontaneous_activity": 0.015, "max_distance": 2.5, "visualize": True, "random_connection": True}
+    kwargs_oscillatory = {"height": 2, "refractory_period": 4, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
+    kwargs_repeating = {"height": 2, "refractory_period": 4, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": True}
+    kwargs_random = {"height": 5, "refractory_period": 5, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
+    btw = BTW(grid_size=[50, 50], **kwargs_pulse_wave)
     btw.init_grid("random", 4)
-    btw.run(10000)
+    btw.run(1000)
