@@ -56,14 +56,13 @@ class BTW():
 
     def add_grain(self) -> None:
         """Add a grain to a random point on the grid."""
+        # TODO: make it so this function activates neurons like the book/paper says
         # Loop through all neurons in the grid
         # Check neurons not in the refractory period
         not_in_ref = self.refractory_matrix == 0
-        # Randomly activate neurons based on probability
         add_matrix = np.random.random(self.grid.shape) < self.probability_of_spontaneous_activity
         # Activate neurons that are not in refractory and have been randomly chosen
-        self.grid[not_in_ref & add_matrix] = self.max_height
-
+        self.grid[not_in_ref & add_matrix] += 1
 
     def neighbormap(self, max_distance) -> None:
         for x in range(-max_distance, max_distance+1):
@@ -101,9 +100,9 @@ class BTW():
 
         for i in range(steps):
             # Initialize a variable for the current avalanche size
+            avalanche_sizes = []
             current_avalanche_size = 0
 
-            # Save the current state of the gride before adding grains
             prev_grid_state = np.copy(self.grid)
 
             self.add_grain()
@@ -113,12 +112,9 @@ class BTW():
             while self.grid.max() >= self.max_height:
                 self.check_neighbors()
 
-                # Count the number of neurons activated at this step
-                # and add it to the current avalanche size
                 newly_activated = (self.grid > prev_grid_state) & (prev_grid_state < self.max_height)
                 current_avalanche_size += np.sum(newly_activated)
 
-                # Record the current avalanche size if it's greater than 0
                 if current_avalanche_size > 0:
                     self.avalanches_sizes.append(current_avalanche_size)
 
