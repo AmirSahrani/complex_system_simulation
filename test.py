@@ -1,8 +1,10 @@
 from sandpile import BTW
 from utils.data_utils import *
+from pandas.testing import assert_frame_equal
 import numpy as np
+import pandas as pd
+import pytest
 import csv
-
 
 def test_init_grid():
     '''
@@ -37,23 +39,61 @@ def test_run():
     
     assert len(btw.spikes_input) == num_steps, "Incorrect length of spikes"
 
+
+
+def test_check_neighbors():
+    grid_test_1 = np.array([[4, 0, 4], 
+                            [0, 0, 0], 
+                            [4, 0, 4]])
+    grid_cont_1 = np.array([[0, 0, 0], 
+                            [0, 4, 0], 
+                            [0, 0, 0]])
+
+    grid_test_2 = np.array([[4, 0, 4, 0],
+                            [0, 4, 0, 4],
+                            [4, 0, 4, 0],
+                            [0, 4, 0, 4]])
+    grid_cont_2 = np.array([[0, 0, 0, 0],
+                            [0, 0, 4, 0],
+                            [0, 4, 0, 0],
+                            [0, 0, 0, 0]])
+
+    grid_test_3 = np.array([[0, 4, 0, 4, 0],
+                            [0, 4, 0, 4, 0],
+                            [0, 0, 0, 0, 0],
+                            [0, 4, 0, 4, 0],
+                            [0, 0, 0, 0, 0]])
+    grid_cont_3 = np.array([[0, 0, 4, 0, 0],
+                            [0, 0, 4, 0, 0],
+                            [0, 0, 4, 0, 0],
+                            [0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0]])
+
+    
+    for i, (test, control) in enumerate(zip([grid_test_1, grid_test_2, grid_test_3], [grid_cont_1, grid_cont_2, grid_cont_3]), start=3):
+        btw = BTW([i, i], height=4, max_distance=1.5)
+        btw.grid = test
+        btw.check_neighbors()
+        assert np.all(btw.grid == control), f'Grid not correctly updated. \n {btw.grid} \n {control}'
+        
+
 def test_writing():
     btw = BTW([10, 10], 4)
     # Initialize the grid
     btw.init_grid("random", 5)
     # Initialize the BTW class with durations and sizes
-    btw.avalanches_sizes = [1, 2, 3]
-    btw.avalanches_durations = [1, 2, 3]
+    btw.spikes_neighbors = [1, 2, 3]
+    btw.spikes_total = [7,5,9]
     # Write the grid to a file
     btw.write_data()
     # Read the csv data
-    with open("data/avalanches.csv", "r") as f:
+    with open("data/spikes_btw.csv", "r") as f:
         reader = csv.reader(f)
         next(reader)  # Skip the header
-        data_read = [(int(size), int(duration)) for size, duration in reader]
+        data_read = [(int(time_steps), int(spikes_neighbors), int(spikes_total), int(spikes_input)) for time_steps, spikes_neighbors, spikes_total, spikes_input in reader]
 
     # Prepare expected data for comparison
-    expected_data = list(zip(btw.avalanches_sizes, btw.avalanches_durations))
+    expected_data = [(i, btw.spikes_neighbors[i], btw.spikes_total[i], btw.spikes_total[i] - btw.spikes_neighbors[i]) for i in range(len(btw.spikes_neighbors))]
 
     # Check if the data is correct
     assert data_read == expected_data
@@ -93,3 +133,45 @@ def test_check_neighbors():
         btw.grid = test
         btw.check_neighbors()
         assert np.all(btw.grid == control), f'Grid not correctly updated. \n {btw.grid} \n {control}'
+
+# def test_to_bin():
+#     df = pd.DataFrame({
+#     'timestep': [1, 2, 3, 4, 5, 6],
+#     'spikes_input': [1, 1, 2, 2, 3, 1],
+#     'spikes_neighbours': [1, 1, 2, 2, 3, 1]})
+#     df_to_bin = pd.DataFrame({
+#     'bin':[1,2,3],
+#     'spikes_input': [2, 4, 4],
+#     'spikes_neighbours': [2, 4, 4]
+#     })
+#     binned_df = to_bin(df, 2)
+#     # assert df_to_bin is the same as binned_df
+#     assert_frame_equal(df_to_bin, binned_df)
+
+def test_avg_spike_density_noref():
+    df = pd.DataFrame({
+    'time_step': [0, 1, 2, 3, 4],
+    'spikes_total': [2,2,3,3,5],
+    'spikes_neighbours': [1, 1, 2, 2, 3],
+    'spikes_input': [1, 1, 1, 1, 2]})
+    a = avg_spike_density(df, 10)
+    assert a == 0.03
+    
+def test_branching_parameter():
+    df = pd.DataFrame({
+    'time_step':[0,1,2,3,4,5,6],
+    'spikes_total': [0,2,0,1,4,4,0],
+    'spikes_neighbors': [0,0,0,0,2,3,0],
+    'spikes_input': [0,2,0,1,2,1,0],
+    })
+    df_2 = pd.DataFrame({
+    'time_step':[0,1,2,3,4,5,6,7,8,9],
+    'spikes_total': [0,2,0,1,4,4,0,1,2,3],
+    'spikes_neighbors': [0,0,0,0,2,3,0,0,1,2],
+    'spikes_input': [0,2,0,1,2,1,0,1,1,1],
+    })
+    
+    a = branching_prameter(df)
+    b = branching_prameter(df_2)
+    assert a == 0.6875
+    assert b == 0.6875
