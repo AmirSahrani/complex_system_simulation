@@ -156,8 +156,10 @@ class BranchingNeurons():
     def init_network(self) -> None:
 
         for neuron in self.neurons:
-            neighbors = np.random.choice(self.neurons, self.max_neighbors, replace=False).tolist()
+            neighbors = np.random.choice(self.neurons, self.max_neighbors - len(neuron.neighbors), replace=False).tolist()
             neuron.neighbors = neighbors
+            for neighbor in neighbors:
+                neighbor.neighbors.append(neuron)
             neuron.generate_probabilities()
         
         assert all([len(neuron.neighbors) == self.max_neighbors for neuron in self.neurons]), "Not all neurons have the same number of neighbors."
@@ -254,7 +256,7 @@ class BranchingNeurons():
     
 
 if __name__ == "__main__":
-    sim = BranchingNeurons(N=1000, max_neighbors=4, visual=False)
+    sim = BranchingNeurons(N=1000, max_neighbors=7, visual=False)
     sim.run(10000)
     print(f'Max avalance size: {max(sim.evalanche_size)}\nMax avalance duration: {max(sim.evalanche_duration)}')
     print(f'Mean branching ratio: {np.mean(sim.branching)}')
