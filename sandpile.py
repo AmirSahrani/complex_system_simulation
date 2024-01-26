@@ -140,10 +140,12 @@ class BTW():
             # Save the current state of the gride before adding grains
             prev_grid_state = np.copy(self.grid)
 
-            self.check_neighbors()
+            # self.check_neighbors()
             self.add_grain()
 
             input_spikes = np.sum((self.grid > prev_grid_state) & (prev_grid_state < self.max_height))
+            
+            self.check_neighbors()
             total_spikes = np.sum(self.grid > 0)
 
             self.spikes_input.append(input_spikes)
@@ -181,3 +183,4 @@ if __name__ == "__main__":
     btw = BTW(grid_size=[50, 50], **kwargs_round_spiral)
     btw.init_grid("random", 4)
     btw.run(10000)
+    #btw.write_data()
