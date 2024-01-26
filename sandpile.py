@@ -2,6 +2,7 @@ import numpy as np
 from typing import List, Optional
 import matplotlib.pyplot as plt
 import random
+from config import *
 
 
 class BTW():
@@ -177,16 +178,6 @@ class BTW():
 
 
 if __name__ == "__main__":
-    settings = [
-    {"name": "round_spiral", "params": {"height": 4, "refractory_period": 5, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}},
-    {"name": "pulse_wave", "params": {"height": 5, "refractory_period": 4, "probability_of_spontaneous_activity": 0.03, "max_distance": 3, "visualize": True, "random_connection": False}},
-    {"name": "synchronous", "params": {"height": 3, "refractory_period": 5, "probability_of_spontaneous_activity": 0.015, "max_distance": 2.5, "visualize": True, "random_connection": True}},
-    {"name": "oscillatory", "params": {"height": 2, "refractory_period": 4, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}},
-    {"name": "repeating", "params": {"height": 2, "refractory_period": 4, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": True}},
-    {"name": "random", "params": {"height": 5, "refractory_period": 5, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}}
-    ]
-    for setting in settings:
-        btw = BTW(grid_size=[50, 50], **setting['params'])
-        btw.init_grid("random", 4)
-        btw.run(10000)
-        btw.write_data(f"data/spikes_btw_{setting['name']}.csv")
+    btw = BTW(grid_size=[50, 50], **kwargs_round_spiral)
+    btw.init_grid("random", 4)
+    btw.run(10000)
