@@ -168,8 +168,8 @@ class BTW():
     
     def write_data(self, path: str) -> None:
         '''Writes single set of self.spikes_neighbors and self.spikes_total and spikes_input to one csv file'''
-        with open("path", "w") as f:
-            f.write("time_steps, spikes_neighbors, spikes_total, spikes_input\n")
+        with open(path, "w") as f:
+            f.write("time_steps, spikes_input, spikes_total, spikes_neighbors\n")
             for i in range(len(self.spikes_input)):
                 spikes_neighbors = self.spikes_total[i] - self.spikes_input[i]
                 f.write(f"{i}, {self.spikes_input[i]}, {self.spikes_total[i]}, {spikes_neighbors}\n")

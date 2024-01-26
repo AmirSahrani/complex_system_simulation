@@ -85,7 +85,7 @@ def test_writing():
     btw.spikes_input = [1, 2, 3]
     btw.spikes_total = [7,5,9]
     # Write the grid to a file
-    btw.write_data()
+    btw.write_data(path="data/spikes_btw.csv")
     # Read the csv data
     with open("data/spikes_btw.csv", "r") as f:
         reader = csv.reader(f)
