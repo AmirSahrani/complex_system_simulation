@@ -2,7 +2,7 @@ import numpy as np
 import csv as csv
 import pandas as pd
 from sandpile import BTW
-
+import os
 def load_data_txt(path: str) -> list:
     """Load data from a file."""
     with open(path, "r") as f:
@@ -44,7 +44,7 @@ def load_data_csv(path: str) -> pd.DataFrame:
 def avg_spike_density(data:pd.DataFrame, size:int) -> float:
     """Calculate the average spike density."""
     # avg_spake_density is defined as avg[spikes_total / the number of neurons] in each time step
-    return np.mean(data['spikes_total']) / size**2
+    return np.mean(data['spikes_total']) / float(size)**2
     # avg_spake_density is defined as avg[spikes_total / （the number of neurons - the sum of spikes in last timestep)] in each timestep
     #!! not sure whether it's needed
     for time_step in data['timestep'].unique():
@@ -62,9 +62,9 @@ def branching_prameter(df: pd.DataFrame) -> float:
     """
     df_copy = df.copy()
 
-    # Check if the last row(s) of df have all zeros in spikes_total, spikes_input, and spikes_neighbors
+    # Check if the last row(s) of df have zeros in spikes_neighbors
     # If yes, truncate these rows
-    while df_copy['spikes_total'].iloc[-1] != 0:
+    while df_copy['spikes_neighbors'].iloc[-1] != 0:
         df_copy = df_copy.iloc[:-1]
     
     df_copy['next_spikes_neighbors'] = df_copy['spikes_neighbors'].shift(-1)
@@ -76,23 +76,5 @@ def branching_prameter(df: pd.DataFrame) -> float:
 
     return sigma
 
-def test_writing():
-    btw = BTW([10, 10], 4)
-    # Initialize the grid
-    btw.init_grid("random", 5)
-    # Initialize the BTW class with durations and sizes
-    btw.spikes_input = [1, 2, 3]
-    btw.spikes_total = [7,5,9]
-    # Write the grid to a file
-    btw.write_data()
-    # Read the csv data
-    with open("data/spikes_btw.csv", "r") as f:
-        reader = csv.reader(f)
-        next(reader)  # Skip the header
-        data_read = [(int(time_steps), int(spikes_neighbors), int(spikes_total), int(spikes_input)) for time_steps, spikes_neighbors, spikes_total, spikes_input in reader]
 
-    # Prepare expected data for comparison
-    expected_data = [(i, btw.spikes_total[i] - btw.spikes_input[i], btw.spikes_input[i]) for i in range(len(btw.spikes_input))]
-
-    # Check if the data is correct
-    assert data_read == expected_data
+    return paths

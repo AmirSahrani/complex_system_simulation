@@ -1,4 +1,4 @@
-time_steps, spikes_neighbors, spikes_total, spikes_input
+time_steps, spikes_input, spikes_total, spikes_neighbors
 0, 1, 7, 6
 1, 2, 5, 3
 2, 3, 9, 6

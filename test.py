@@ -90,7 +90,7 @@ def test_writing():
     btw.spikes_input = [1, 2, 3]
     btw.spikes_total = [7,5,9]
     # Write the grid to a file
-    btw.write_data()
+    btw.write_data(path="data/spikes_btw.csv")
     # Read the csv data
     with open("data/spikes_btw.csv", "r") as f:
         reader = csv.reader(f)
@@ -102,7 +102,6 @@ def test_writing():
 
     # Check if the data is correct
     assert data_read == expected_data
-
 
 def test_check_neighbors():
     grid_test_1 = np.array([[4, 0, 4], 
@@ -180,3 +179,4 @@ def test_branching_parameter():
     b = branching_prameter(df_2)
     assert a == 0.6875
     assert b == 0.6875
+

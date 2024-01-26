@@ -17,7 +17,7 @@ class BTW():
         self.refractory_period = refractory_period
         self.refractory_matrix = np.zeros(grid_size)
         self.spikes_input = []
-        self.spikes_total = []
+        self.spikes_neighbours = []
         self.probability_of_spontaneous_activity = probability_of_spontaneous_activity
         self.random_connection = random_connection
 
@@ -129,12 +129,11 @@ class BTW():
         """
         Run the model for a number of steps.
         """
-        #TODO: Revise avalanche size/duration counting      
-
+        #!! TOCheck: @Terry I think this calculation is right. You can check it again.
         for i in range(steps):
             # Initialize a variable for the current avalanche size
             input_spikes = 0
-            total_spikes = 0
+            neighbour_spikes = 0
 
 
             # Save the current state of the gride before adding grains
@@ -143,13 +142,12 @@ class BTW():
             # self.check_neighbors()
             self.add_grain()
 
-            input_spikes = np.sum((self.grid > prev_grid_state) & (prev_grid_state < self.max_height))
+            input_spikes = np.sum(self.grid != 0)
             
             self.check_neighbors()
-            total_spikes = np.sum(self.grid > 0)
-
+            neighbour_spikes = np.sum(self.grid > 0) 
             self.spikes_input.append(input_spikes)
-            self.spikes_total.append(total_spikes)
+            self.spikes_neighbours.append(neighbour_spikes)
 
             if self.visualize:
                 self.plot()
@@ -161,20 +159,22 @@ class BTW():
         self.fig, self.ax = plt.subplots()
         self.fig.colorbar(plt.cm.ScalarMappable(cmap=self.cm), ax=self.ax)
 
-
     def plot(self) -> None:
         self.ax.imshow(self.grid, cmap=self.cm)
         plt.pause(0.001)
         self.ax.clear()
 
-
-    def write_data(self) -> None:
-        '''Writes self.spikes_neighbors and self.spikes_total and spikes_input to one csv file'''
-        with open("data/spikes_btw.csv", "w") as f:
-            f.write("time_steps, spikes_neighbors, spikes_total, spikes_input\n")
+    
+    
+    def write_data(self, path: str) -> None:
+        '''Writes single set of self.spikes_neighbors and self.spikes_total and spikes_input to one csv file'''
+        with open(path, "w") as f:
+            f.write("time_steps,spikes_input,spikes_total,spikes_neighbors\n")
             for i in range(len(self.spikes_input)):
-                spikes_neighbors = self.spikes_total[i] - self.spikes_input[i]
-                f.write(f"{i}, {self.spikes_input[i]}, {self.spikes_total[i]}, {spikes_neighbors}\n")
+                spikes_total = self.spikes_neighbours[i] + self.spikes_input[i]
+                f.write(f"{i}, {self.spikes_input[i]}, {spikes_total}, {self.spikes_neighbours[i]}\n")
+
+
 
 
 if __name__ == "__main__":
