@@ -28,7 +28,6 @@ class BTW():
             self.neighbormap(max_distance)
 
 
-
     def init_grid(self, method: str, N: Optional[int], func: Optional[callable] = None) -> None:
         """
         Initialize the grid with a method.
@@ -88,6 +87,7 @@ class BTW():
         # Activate neurons that are not in refractory and have been randomly chosen
         self.grid[not_in_ref & add_matrix] += 1
 
+
     def neighbormap(self, max_distance) -> None:
         for x in range(int(np.floor(-max_distance)), int(np.ceil(max_distance+1))):
             for y in range(int(np.floor(-max_distance)), int(np.ceil(max_distance+1))):
@@ -126,8 +126,6 @@ class BTW():
         """
         Run the model for a number of steps.
         """
-        #TODO: Revise avalanche size/duration counting      
-
         for i in range(steps):
             # Initialize a variable for the current avalanche size
             avalanche_sizes = []
