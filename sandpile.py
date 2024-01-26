@@ -128,11 +128,15 @@ class BTW():
         """
         Run the model for a number of steps.
         """
+        #TODO: Revise avalanche size/duration counting      
+
         for i in range(steps):
             # Initialize a variable for the current avalanche size
             input_spikes = 0
             total_spikes = 0
 
+
+            # Save the current state of the gride before adding grains
             prev_grid_state = np.copy(self.grid)
 
             self.check_neighbors()
@@ -157,7 +161,7 @@ class BTW():
 
     def plot(self) -> None:
         self.ax.imshow(self.grid, cmap=self.cm)
-        plt.pause(0.01)
+        plt.pause(0.001)
         self.ax.clear()
 
 
@@ -178,4 +182,4 @@ if __name__ == "__main__":
     kwargs_random = {"height": 5, "refractory_period": 5, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
     btw = BTW(grid_size=[50, 50], **kwargs_round_spiral)
     btw.init_grid("random", 4)
-    btw.run(1000)
+    btw.run(10000)
