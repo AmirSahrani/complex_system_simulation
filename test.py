@@ -98,7 +98,6 @@ def test_writing():
     # Check if the data is correct
     assert data_read == expected_data
 
-
 def test_check_neighbors():
     grid_test_1 = np.array([[4, 0, 4], 
                             [0, 0, 0], 
@@ -175,3 +174,4 @@ def test_branching_parameter():
     b = branching_prameter(df_2)
     assert a == 0.6875
     assert b == 0.6875
+

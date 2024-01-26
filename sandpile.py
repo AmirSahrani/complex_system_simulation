@@ -158,29 +158,35 @@ class BTW():
         self.fig, self.ax = plt.subplots()
         self.fig.colorbar(plt.cm.ScalarMappable(cmap=self.cm), ax=self.ax)
 
-
     def plot(self) -> None:
         self.ax.imshow(self.grid, cmap=self.cm)
         plt.pause(0.001)
         self.ax.clear()
 
-
-    def write_data(self) -> None:
-        '''Writes self.spikes_neighbors and self.spikes_total and spikes_input to one csv file'''
-        with open("data/spikes_btw.csv", "w") as f:
+    
+    
+    def write_data(self, path: str) -> None:
+        '''Writes single set of self.spikes_neighbors and self.spikes_total and spikes_input to one csv file'''
+        with open("path", "w") as f:
             f.write("time_steps, spikes_neighbors, spikes_total, spikes_input\n")
             for i in range(len(self.spikes_input)):
                 spikes_neighbors = self.spikes_total[i] - self.spikes_input[i]
                 f.write(f"{i}, {self.spikes_input[i]}, {self.spikes_total[i]}, {spikes_neighbors}\n")
 
 
+
+
 if __name__ == "__main__":
-    kwargs_round_spiral = {"height": 4, "refractory_period": 5, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
-    kwargs_pulse_wave = {"height": 5, "refractory_period": 4, "probability_of_spontaneous_activity": 0.03, "max_distance": 3, "visualize": True, "random_connection": False}
-    kwargs_synchronous = {"height": 3, "refractory_period": 5, "probability_of_spontaneous_activity": 0.015, "max_distance": 2.5, "visualize": True, "random_connection": True}
-    kwargs_oscillatory = {"height": 2, "refractory_period": 4, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
-    kwargs_repeating = {"height": 2, "refractory_period": 4, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": True}
-    kwargs_random = {"height": 5, "refractory_period": 5, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
-    btw = BTW(grid_size=[50, 50], **kwargs_round_spiral)
-    btw.init_grid("random", 4)
-    btw.run(10000)
+    settings = [
+    {"name": "round_spiral", "params": {"height": 4, "refractory_period": 5, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}},
+    {"name": "pulse_wave", "params": {"height": 5, "refractory_period": 4, "probability_of_spontaneous_activity": 0.03, "max_distance": 3, "visualize": True, "random_connection": False}},
+    {"name": "synchronous", "params": {"height": 3, "refractory_period": 5, "probability_of_spontaneous_activity": 0.015, "max_distance": 2.5, "visualize": True, "random_connection": True}},
+    {"name": "oscillatory", "params": {"height": 2, "refractory_period": 4, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}},
+    {"name": "repeating", "params": {"height": 2, "refractory_period": 4, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": True}},
+    {"name": "random", "params": {"height": 5, "refractory_period": 5, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}}
+    ]
+    for setting in settings:
+        btw = BTW(grid_size=[50, 50], **setting['params'])
+        btw.init_grid("random", 4)
+        btw.run(10000)
+        btw.write_data(f"data/spikes_btw_{setting['name']}.csv")
