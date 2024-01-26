@@ -29,6 +29,17 @@ class Neuron():
         self.cooldown = 0
         self.activation_probability = activation_p
         self.avalanche: Avalanche_graph =Avalanche_graph(self)
+        self.probabilities = {}
+
+        self.generate_probabilities()
+
+    def generate_probabilities(self):
+        n_probs = len(self.neighbors)
+        rand_vec = np.random.random(n_probs)
+        rand_vec /= np.sum(rand_vec)
+        rand_vec *= 1
+        for neighbor, prob in zip(self.neighbors, rand_vec):
+            self.probabilities[neighbor] = prob
 
 
 class Avalanche_graph():
@@ -39,20 +50,32 @@ class Avalanche_graph():
         self.nodes = [neuron]
         self.edges = []
         self.ad_matrix: csr_matrix
-        self.neuron_counter = 0
+        self.neuron_edge_dict = {}
 
     def add_node(self, neuron: Neuron) -> None:
         self.nodes.append(neuron)
-        self.neuron_counter += 1
+
 
     def add_edge(self, neuron_a: Neuron, neuron_b: Neuron) -> None:
-        self.edges.append((self.neuron_counter, self.neuron_counter + 1))
+        self.edges.append((neuron_a, neuron_b))
     
+
+    def generate_neuron_edge_dict(self):
+        for i,node in enumerate(set(self.nodes)):
+            self.neuron_edge_dict[node] = i
+
+
+    def edges_to_indices(self):
+        for i, (node_a, node_b) in enumerate(self.edges):
+            self.edges[i] = (self.neuron_edge_dict[node_a], self.neuron_edge_dict[node_b])
+
     def adjacency_matrix(self):
         """
         Returns the adjacency matrix of the avalanche.
         """
-        dim = self.neuron_counter + 2
+        self.generate_neuron_edge_dict()
+        self.edges_to_indices()
+        dim = len(set(self.nodes))
         rows, cols = zip(*self.edges)  
         data = np.ones(len(rows), dtype=np.int8)
         self.ad_matrix = csr_matrix((data, (rows, cols)), shape=(dim, dim), dtype=np.int8)
@@ -65,7 +88,7 @@ class Avalanche_graph():
         dist = dijkstra(self.ad_matrix)
         dist[dist == np.inf] = 0
 
-        return np.max(dist)
+        return np.max(dist[0, :])
     
 
 
@@ -113,13 +136,12 @@ class BranchingNeurons():
             Plots the duration of each avalanche during the simulation.
     """
 
-    def __init__(self, N:int, connection_probability: float, 
-                 visual: bool=False) -> None:
+    def __init__(self, N:int, max_neighbors: int, visual: bool=False) -> None:
 
         self.neurons = [Neuron(tuple(np.random.random(2)), 
                                np.random.random()) for i in range(N)]
-        self.connection_probability = connection_probability
         self.visual = visual
+        self.max_neighbors = max_neighbors
 
         self.evalanche_size = []
         self.evalanche_duration = []
@@ -132,21 +154,22 @@ class BranchingNeurons():
             self.setup_plot()
     
     def init_network(self) -> None:
-        for neuron_a in self.neurons:
-            for neuron_b in self.neurons:
-                if np.random.random() < self.connection_probability:
-                    neuron_a.neighbors.append(neuron_b)
-                    neuron_b.neighbors.append(neuron_a) 
+
+        for neuron in self.neurons:
+            neighbors = np.random.choice(self.neurons, self.max_neighbors, replace=False).tolist()
+            neuron.neighbors = neighbors
+            neuron.generate_probabilities()
+        
+        assert all([len(neuron.neighbors) == self.max_neighbors for neuron in self.neurons]), "Not all neurons have the same number of neighbors."
+
+                
 
     def propage_activations(self, neuron: Neuron):
 
-        assert len(neuron.origins) <= 1, "Neuron has more than one origin."
-        for origin in neuron.origins:
-            if neuron in origin.activated_neighbors:
-                origin.activated_neighbors.remove(neuron)
+        assert neuron.active, "Neuron is not active."
 
         for neighbor in neuron.neighbors:
-            if not neighbor.active and np.random.random() < neighbor.activation_probability:
+            if not neighbor.active and np.random.random() < neuron.probabilities[neighbor]:
                 if not neighbor.cooldown:
 
                     neuron.avalanche.add_node(neighbor)
@@ -154,18 +177,14 @@ class BranchingNeurons():
                     neighbor.avalanche = neuron.avalanche
                     neuron.avalanche = Avalanche_graph(neuron)
 
-                    neighbor.origins.append(neuron)
                     neighbor.active = 1
                     self.next_active.append(neighbor)
                     neuron.activated_neighbors.append(neighbor)
-                else:
-                    neuron.cooldown -= 1
-        self.branching.append(len(neuron.activated_neighbors))
+
         if not neuron.activated_neighbors and len(neuron.avalanche.nodes) > 1:
             self.evalanche_size.append(len(neuron.avalanche.nodes))
             self.evalanche_duration.append(neuron.avalanche.get_diameter())
             neuron.avalanche = Avalanche_graph(neuron)
-            neuron.origins = []
 
 
     def reset(self):
@@ -176,7 +195,7 @@ class BranchingNeurons():
     
     def random_activation(self):
         for neuron in self.neurons:
-            if np.random.random() < 1e-1 and not neuron.active:
+            if np.random.random() < 1e-5 and not neuron.active:
                 neuron.active = 1
                 self.active.append(neuron)
 
@@ -187,9 +206,14 @@ class BranchingNeurons():
         self.ax.clear()
         for neuron in self.neurons:
             if neuron.active:
-                self.ax.scatter(neuron.location[0], neuron.location[1], c="red")
-                for neighbor in neuron.activated_neighbors:
-                    self.ax.plot([neuron.location[0], neighbor.location[0]], [neuron.location[1], neighbor.location[1]], c="red", linewidth=0.7)
+                if len(neuron.avalanche.nodes) > 0:
+                    self.ax.scatter(neuron.location[0], neuron.location[1], s= len(neuron.avalanche.nodes)*2, c="blue")
+                    for neighbor in neuron.activated_neighbors:
+                        self.ax.plot([neuron.location[0], neighbor.location[0]], [neuron.location[1], neighbor.location[1]], c="blue", linewidth=0.7)
+                else:
+                    self.ax.scatter(neuron.location[0], neuron.location[1], c="red")
+                    for neighbor in neuron.activated_neighbors:
+                        self.ax.plot([neuron.location[0], neighbor.location[0]], [neuron.location[1], neighbor.location[1]], c="red", linewidth=0.7)
             else:
                 self.ax.scatter(neuron.location[0], neuron.location[1], c="gray")
                 for neighbor in neuron.neighbors:
@@ -204,14 +228,21 @@ class BranchingNeurons():
 
                 self.propage_activations(neuron)
                 neuron.active = 0
-                neuron.cooldown = 1
+                neuron.cooldown = 0
 
-            self.active = self.next_active.copy()
-            self.next_active = []
+            for neuron in self.neurons:
+                if neuron.cooldown:
+                    neuron.cooldown -= 1
 
             if self.visual:
                 self.plot()
-                plt.pause(0.00001)
+                plt.pause(0.5)
+
+            if self.active:
+                self.branching.append(len(self.next_active)/len(self.active))
+
+            self.active = self.next_active.copy()
+            self.next_active = []
 
     def plot_evalanche_size(self):
         plt.plot(self.evalanche_size)
@@ -223,6 +254,7 @@ class BranchingNeurons():
     
 
 if __name__ == "__main__":
-    sim = BranchingNeurons(1000, 0.05, visual=True)
-    sim.run(1000)
-    print(sum(sim.evalanche_size)/len(sim.evalanche_size), sum(sim.evalanche_duration)/len(sim.evalanche_duration), sum(sim.branching)/len(sim.branching))
+    sim = BranchingNeurons(N=1000, max_neighbors=4, visual=False)
+    sim.run(10000)
+    print(f'Max avalance size: {max(sim.evalanche_size)}\nMax avalance duration: {max(sim.evalanche_duration)}')
+    print(f'Mean branching ratio: {np.mean(sim.branching)}')
