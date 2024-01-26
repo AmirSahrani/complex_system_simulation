@@ -166,11 +166,12 @@ class BTW():
 
 
     def write_data(self) -> None:
-        '''Writes self.avalanches_sizes and self_avalanches_durations to one csv file'''
-        with open("data/avalanches.csv", "w") as f:
-            f.write("size,duration\n")
-            for size, duration in zip(self.avalanches_sizes, self.avalanches_durations):
-                f.write(f"{size},{duration}\n")
+        '''Writes self.spikes_neighbors and self.spikes_total and spikes_input to one csv file'''
+        with open("data/spikes_btw.csv", "w") as f:
+            f.write("time_steps, spikes_neighbors, spikes_total, spikes_input\n")
+            for i in range(len(self.spikes_input)):
+                spikes_neighbors = self.spikes_total[i] - self.spikes_input[i]
+                f.write(f"{i}, {self.spikes_input[i]}, {self.spikes_total[i]}, {spikes_neighbors}\n")
 
 
 if __name__ == "__main__":
