@@ -82,7 +82,7 @@ def test_writing():
     # Initialize the grid
     btw.init_grid("random", 5)
     # Initialize the BTW class with durations and sizes
-    btw.spikes_neighbors = [1, 2, 3]
+    btw.spikes_input = [1, 2, 3]
     btw.spikes_total = [7,5,9]
     # Write the grid to a file
     btw.write_data()
@@ -90,10 +90,10 @@ def test_writing():
     with open("data/spikes_btw.csv", "r") as f:
         reader = csv.reader(f)
         next(reader)  # Skip the header
-        data_read = [(int(time_steps), int(spikes_neighbors), int(spikes_total), int(spikes_input)) for time_steps, spikes_neighbors, spikes_total, spikes_input in reader]
+        data_read = [(int(time_steps), int(spikes_input), int(spikes_total), int(spikes_neighbors)) for time_steps, spikes_input, spikes_total, spikes_neighbors in reader]
 
     # Prepare expected data for comparison
-    expected_data = [(i, btw.spikes_neighbors[i], btw.spikes_total[i], btw.spikes_total[i] - btw.spikes_neighbors[i]) for i in range(len(btw.spikes_neighbors))]
+    expected_data = [(i, btw.spikes_input[i], btw.spikes_total[i], btw.spikes_total[i]- btw.spikes_input[i]) for i in range(len(btw.spikes_input))]
 
     # Check if the data is correct
     assert data_read == expected_data
