@@ -35,7 +35,12 @@ def test_run():
     num_steps = 100
     btw.run(num_steps)
     
-    assert len(btw.spikes_input) == num_steps, "Incorrect length of spikes"
+    assert len(btw.spikes_input) == num_steps, "Incorrect length of spikes_input list."
+    assert len(btw.spikes_total) == num_steps, "Incorrect length of spikes_total list."
+
+    for input_spikes, total_spikes in zip(btw.spikes_input, btw.spikes_total):
+        assert total_spikes >= 0, "Total spikes should be non-negative."
+        assert total_spikes >= input_spikes, "Total spikes should be greater than or equal to input spikes."
 
 def test_writing():
     btw = BTW([10, 10], 4)
@@ -93,3 +98,6 @@ def test_check_neighbors():
         btw.grid = test
         btw.check_neighbors()
         assert np.all(btw.grid == control), f'Grid not correctly updated. \n {btw.grid} \n {control}'
+
+if __name__ == "__main__":
+    test_run()

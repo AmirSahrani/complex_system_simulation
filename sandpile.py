@@ -139,10 +139,12 @@ class BTW():
             # Save the current state of the gride before adding grains
             prev_grid_state = np.copy(self.grid)
 
-            self.check_neighbors()
+            # self.check_neighbors()
             self.add_grain()
 
             input_spikes = np.sum((self.grid > prev_grid_state) & (prev_grid_state < self.max_height))
+            
+            self.check_neighbors()
             total_spikes = np.sum(self.grid > 0)
 
             self.spikes_input.append(input_spikes)
@@ -167,10 +169,10 @@ class BTW():
 
     def write_data(self) -> None:
         '''Writes self.avalanches_sizes and self_avalanches_durations to one csv file'''
-        with open("data/avalanches.csv", "w") as f:
-            f.write("size,duration\n")
-            for size, duration in zip(self.avalanches_sizes, self.avalanches_durations):
-                f.write(f"{size},{duration}\n")
+        with open("data/revised_version_i_spike_tot_spike.csv", "w") as f:
+            f.write("input_spikes, total_spikes\n")
+            for input_s, total_s in zip(self.spikes_input, self.spikes_total):
+                f.write(f"{input_s},{total_s}\n")
 
 
 if __name__ == "__main__":
@@ -183,3 +185,4 @@ if __name__ == "__main__":
     btw = BTW(grid_size=[50, 50], **kwargs_round_spiral)
     btw.init_grid("random", 4)
     btw.run(10000)
+    #btw.write_data()
