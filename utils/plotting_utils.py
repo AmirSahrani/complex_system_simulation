@@ -2,12 +2,18 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def power_law_plot(data):
+def power_law_plot(data, data_type='size'):
     """Plot a distribution on log-log axes."""
     plt.hist(data, bins=len(data), log=True)
-    plt.xlabel("Avalanche duration")
-    plt.ylabel("Frequency")
-    plt.title("Avalanche duration distribution")
+
+    if data_type == 'size':
+        plt.xlabel("Avalanche Size")
+        plt.title('Avalanche Size Distribution')
+    elif data_type == 'duration':
+        plt.xlabel('Avalanche Duration')
+        plt.title('Avalanche Duration Distribution')
+
+    plt.ylabel('Frequency')
     plt.show()
 
 

@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List, Optional
 import matplotlib.pyplot as plt
+import os
 
 
 class BTW():
@@ -48,21 +49,15 @@ class BTW():
                     self.plot()
         elif method == "custom":
             self.grid = func(self.grid)
-
-
-    def calculate_avalanch_size(self):
-        pass
     
 
     def add_grain(self) -> None:
         """Add a grain to a random point on the grid."""
         # TODO: make it so this function activates neurons like the book/paper says
-        # Loop through all neurons in the grid
-        # Check neurons not in the refractory period
         not_in_ref = self.refractory_matrix == 0
         add_matrix = np.random.random(self.grid.shape) < self.probability_of_spontaneous_activity
-        # Activate neurons that are not in refractory and have been randomly chosen
-        self.grid[not_in_ref & add_matrix] += 1
+        self.grid[not_in_ref & add_matrix] += self.max_height
+
 
     def neighbormap(self, max_distance) -> None:
         for x in range(-max_distance, max_distance+1):
@@ -94,36 +89,27 @@ class BTW():
         Run the model for a number of steps.
         """
         #TODO: Revise avalanche size/duration counting
-
-        # Initialize a list to store the size of each avalanche
-        
-
         for i in range(steps):
-            # Initialize a variable for the current avalanche size
-            avalanche_sizes = []
-            current_avalanche_size = 0
-
-            prev_grid_state = np.copy(self.grid)
-
             self.add_grain()
+            avalanche_triggered = False
+            current_avalanche_size = 0
+            avalanches_duration = 0
 
-            avalanche_duration = 0
-            
             while self.grid.max() >= self.max_height:
+                avalanche_triggered = True
+                current_avalanche_size += np.sum(self.grid >= self.max_height)
+                
                 self.check_neighbors()
-
-                newly_activated = (self.grid > prev_grid_state) & (prev_grid_state < self.max_height)
-                current_avalanche_size += np.sum(newly_activated)
-
-                if current_avalanche_size > 0:
-                    self.avalanches_sizes.append(current_avalanche_size)
 
                 if self.visualize:
                     self.plot()
-                avalanche_duration += 1
+                avalanches_duration += 1
 
-            if avalanche_duration > 0:
-                self.avalanches_durations.append(avalanche_duration)
+            if avalanche_triggered:
+                self.avalanches_sizes.append(current_avalanche_size)
+                self.avalanches_durations.append(avalanches_duration)
+
+            print(i)    
 
             self.refractory_matrix[self.refractory_matrix > 0] -= 1
 
@@ -141,7 +127,7 @@ class BTW():
 
     def write_data(self) -> None:
         '''Writes self.avalanches_sizes and self_avalanches_durations to one csv file'''
-        with open("data/avalanches.csv", "w") as f:
+        with open("data/new_run_func.csv", "w") as f:
             f.write("size,duration\n")
             for size, duration in zip(self.avalanches_sizes, self.avalanches_durations):
                 f.write(f"{size},{duration}\n")
@@ -151,3 +137,4 @@ if __name__ == "__main__":
     btw = BTW(grid_size=[21, 21], height=5, refractory_period=3, probability_of_spontaneous_activity=0.03, max_distance=3, visualize=True)
     btw.init_grid("random", 4)
     btw.run(10000)
+    btw.write_data()
