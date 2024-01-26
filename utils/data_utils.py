@@ -62,9 +62,9 @@ def branching_prameter(df: pd.DataFrame) -> float:
     """
     df_copy = df.copy()
 
-    # Check if the last row(s) of df have all zeros in spikes_total, spikes_input, and spikes_neighbors
+    # Check if the last row(s) of df have zeros in spikes_neighbors
     # If yes, truncate these rows
-    while df_copy['spikes_total'].iloc[-1] != 0:
+    while df_copy['spikes_neighbors'].iloc[-1] != 0:
         df_copy = df_copy.iloc[:-1]
     
     df_copy['next_spikes_neighbors'] = df_copy['spikes_neighbors'].shift(-1)
