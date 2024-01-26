@@ -29,6 +29,14 @@ def test_add_grain():
     assert sum_spikes > 0 and sum_spikes < 100, "Grains are not added correctly."
 
 
+def test_run():
+    btw = BTW(grid_size[10, 10], height=4, probability_of_spontaneous_activity=0.03, max_distance=2, visualize=False)
+
+    num_steps = 100
+    btw.run(num_steps)
+    
+    assert len(btw.spikes_input) == num_steps, "Incorrect length of spikes"
+
 def test_writing():
     btw = BTW([10, 10], 4)
     # Initialize the grid

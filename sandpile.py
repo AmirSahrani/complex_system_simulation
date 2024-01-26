@@ -15,8 +15,8 @@ class BTW():
         self.visualize = visualize
         self.refractory_period = refractory_period
         self.refractory_matrix = np.zeros(grid_size)
-        self.avalanches_sizes = []
-        self.avalanches_durations = []
+        self.spikes_input = []
+        self.spikes_total = []
         self.probability_of_spontaneous_activity = probability_of_spontaneous_activity
         self.random_connection = random_connection
 
@@ -89,6 +89,7 @@ class BTW():
         self.grid[not_in_ref & add_matrix] = self.max_height
 
 
+
     def neighbormap(self, max_distance) -> None:
         for x in range(int(np.floor(-max_distance)), int(np.ceil(max_distance+1))):
             for y in range(int(np.floor(-max_distance)), int(np.ceil(max_distance+1))):
@@ -131,32 +132,24 @@ class BTW():
 
         for i in range(steps):
             # Initialize a variable for the current avalanche size
-            current_avalanche_size = 0
+            input_spikes = 0
+            total_spikes = 0
+
 
             # Save the current state of the gride before adding grains
             prev_grid_state = np.copy(self.grid)
 
-            avalanche_duration = 0
-
             self.check_neighbors()
-
             self.add_grain()
 
-            # Count the number of neurons activated at this step
-            # and add it to the current avalanche size
-            newly_activated = (self.grid > prev_grid_state) & (prev_grid_state < self.max_height)
-            current_avalanche_size += np.sum(newly_activated)
+            input_spikes = np.sum((self.grid > prev_grid_state) & (prev_grid_state < self.max_height))
+            total_spikes = np.sum(self.grid > 0)
 
-            # Record the current avalanche size if it's greater than 0
-            if current_avalanche_size > 0:
-                self.avalanches_sizes.append(current_avalanche_size)
+            self.spikes_input.append(input_spikes)
+            self.spikes_total.append(total_spikes)
 
             if self.visualize:
                 self.plot()
-            avalanche_duration += 1
-
-            if avalanche_duration > 0:
-                self.avalanches_durations.append(avalanche_duration)
 
             self.refractory_matrix[self.refractory_matrix > 0] -= 1
 
