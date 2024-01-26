@@ -89,6 +89,7 @@ class BTW():
         self.grid[not_in_ref & add_matrix] = self.max_height
 
 
+
     def neighbormap(self, max_distance) -> None:
         for x in range(int(np.floor(-max_distance)), int(np.ceil(max_distance+1))):
             for y in range(int(np.floor(-max_distance)), int(np.ceil(max_distance+1))):
@@ -127,8 +128,6 @@ class BTW():
         """
         Run the model for a number of steps.
         """
-        #TODO: Revise avalanche size/duration counting      
-
         for i in range(steps):
             # Initialize a variable for the current avalanche size
             input_spikes = 0
@@ -158,7 +157,7 @@ class BTW():
 
     def plot(self) -> None:
         self.ax.imshow(self.grid, cmap=self.cm)
-        plt.pause(0.001)
+        plt.pause(0.01)
         self.ax.clear()
 
 
@@ -179,4 +178,4 @@ if __name__ == "__main__":
     kwargs_random = {"height": 5, "refractory_period": 5, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
     btw = BTW(grid_size=[50, 50], **kwargs_round_spiral)
     btw.init_grid("random", 4)
-    btw.run(10000)
+    btw.run(1000)
