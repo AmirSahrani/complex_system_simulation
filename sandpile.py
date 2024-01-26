@@ -28,6 +28,7 @@ class BTW():
             self.neighbormap(max_distance)
 
 
+
     def init_grid(self, method: str, N: Optional[int], func: Optional[callable] = None) -> None:
         """
         Initialize the grid with a method.
@@ -79,13 +80,13 @@ class BTW():
 
     def add_grain(self) -> None:
         """Add a grain to a random point on the grid."""
-        # TODO: make it so this function activates neurons like the book/paper says
         # Loop through all neurons in the grid
         # Check neurons not in the refractory period
         not_in_ref = self.refractory_matrix == 0
+        # Randomly activate neurons based on probability
         add_matrix = np.random.random(self.grid.shape) < self.probability_of_spontaneous_activity
         # Activate neurons that are not in refractory and have been randomly chosen
-        self.grid[not_in_ref & add_matrix] += 1
+        self.grid[not_in_ref & add_matrix] = self.max_height
 
 
     def neighbormap(self, max_distance) -> None:
@@ -126,11 +127,13 @@ class BTW():
         """
         Run the model for a number of steps.
         """
+        #TODO: Revise avalanche size/duration counting      
+
         for i in range(steps):
             # Initialize a variable for the current avalanche size
-            avalanche_sizes = []
             current_avalanche_size = 0
 
+            # Save the current state of the gride before adding grains
             prev_grid_state = np.copy(self.grid)
 
             avalanche_duration = 0
@@ -165,7 +168,7 @@ class BTW():
 
     def plot(self) -> None:
         self.ax.imshow(self.grid, cmap=self.cm)
-        plt.pause(0.01)
+        plt.pause(0.001)
         self.ax.clear()
 
 
@@ -184,6 +187,6 @@ if __name__ == "__main__":
     kwargs_oscillatory = {"height": 2, "refractory_period": 4, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
     kwargs_repeating = {"height": 2, "refractory_period": 4, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": True}
     kwargs_random = {"height": 5, "refractory_period": 5, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
-    btw = BTW(grid_size=[50, 50], **kwargs_pulse_wave)
+    btw = BTW(grid_size=[50, 50], **kwargs_round_spiral)
     btw.init_grid("random", 4)
-    btw.run(1000)
+    btw.run(10000)
