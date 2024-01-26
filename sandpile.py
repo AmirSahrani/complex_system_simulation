@@ -129,8 +129,7 @@ class BTW():
         """
         Run the model for a number of steps.
         """
-        #TODO: Revise avalanche size/duration counting      
-
+        #!! TOCheck: @Terry I think this calculation is right. You can check it again.
         for i in range(steps):
             # Initialize a variable for the current avalanche size
             input_spikes = 0
