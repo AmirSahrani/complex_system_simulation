@@ -2,6 +2,7 @@ import numpy as np
 from typing import List, Optional
 import matplotlib.pyplot as plt
 import random
+from config import *
 
 
 class BTW():
@@ -175,12 +176,6 @@ class BTW():
 
 
 if __name__ == "__main__":
-    kwargs_round_spiral = {"height": 4, "refractory_period": 5, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
-    kwargs_pulse_wave = {"height": 5, "refractory_period": 4, "probability_of_spontaneous_activity": 0.03, "max_distance": 3, "visualize": True, "random_connection": False}
-    kwargs_synchronous = {"height": 3, "refractory_period": 5, "probability_of_spontaneous_activity": 0.015, "max_distance": 2.5, "visualize": True, "random_connection": True}
-    kwargs_oscillatory = {"height": 2, "refractory_period": 4, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
-    kwargs_repeating = {"height": 2, "refractory_period": 4, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": True}
-    kwargs_random = {"height": 5, "refractory_period": 5, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
     btw = BTW(grid_size=[50, 50], **kwargs_round_spiral)
     btw.init_grid("random", 4)
     btw.run(10000)
