@@ -167,12 +167,12 @@ class BTW():
         """
         Writes single set of self.spikes_neighbors, self.spikes_total and spikes_input to one csv file.
         """
-        args = {"grid size": self.grid.shape[0], 
+        args = {"grid_size": self.grid.shape[0] * self.grid.shape[1], 
                 "height": self.max_height, 
-                "refractory period": self.refractory_period, 
-                "max distance": self.max_distance, 
-                "probability of spontaneous_activity": self.probability_of_spontaneous_activity, 
-                "random connection": self.random_connection}
+                "max_distance": self.max_distance, 
+                "refractory_period": self.refractory_period, 
+                "probability_of_spontaneous_activity": self.probability_of_spontaneous_activity, 
+                "random_connection": self.random_connection}
         args_df = pd.DataFrame(args, index=[0])
 
         spikes_total, spikes_neighbours = np.array(self.spikes_total), np.array(self.spikes_neighbours)
@@ -187,7 +187,7 @@ class BTW():
 
 
 if __name__ == "__main__":
-    btw = BTW(grid_size=[50, 50], **kwargs_synchronous)
+    btw = BTW(grid_size=[50, 50])
     # btw.init_grid("random", 4)
     btw.run(10000)
-    # btw.write_data("path")
+    btw.write_data("data/test")

@@ -32,17 +32,17 @@ def test_add_grain():
 
 
 def test_run():
-    btw = BTW(grid_size[10, 10], height=4, probability_of_spontaneous_activity=0.03, max_distance=2, visualize=False)
+    btw = BTW(grid_size=[10, 10], height=4, probability_of_spontaneous_activity=0.03, max_distance=2, visualize=False)
 
     num_steps = 100
     btw.run(num_steps)
     
-    assert len(btw.spikes_input) == num_steps, "Incorrect length of spikes_input list."
+    assert len(btw.spikes_neighbours) == num_steps, "Incorrect length of spikes_neighbours list."
     assert len(btw.spikes_total) == num_steps, "Incorrect length of spikes_total list."
 
-    for input_spikes, total_spikes in zip(btw.spikes_input, btw.spikes_total):
+    for neighbour_spikes, total_spikes in zip(btw.spikes_neighbours, btw.spikes_total):
         assert total_spikes >= 0, "Total spikes should be non-negative."
-        assert total_spikes >= input_spikes, "Total spikes should be greater than or equal to input spikes."
+        assert total_spikes >= neighbour_spikes, "Total spikes should be greater than or equal to input spikes."
 
 
 
@@ -83,25 +83,24 @@ def test_check_neighbors():
         
 
 def test_writing():
-    btw = BTW([10, 10], 4)
-    # Initialize the grid
-    btw.init_grid("random", 5)
-    # Initialize the BTW class with durations and sizes
-    btw.spikes_input = [1, 2, 3]
-    btw.spikes_neighbours = [7,5,9]
-    # Write the grid to a file
-    btw.write_data(path="data/spikes_btw.csv")
-    # Read the csv data
-    with open("data/spikes_btw.csv", "r") as f:
-        reader = csv.reader(f)
-        next(reader)  # Skip the header
-        data_read = [(int(time_steps), int(spikes_input), int(spikes_total), int(spikes_neighbors)) for time_steps, spikes_input, spikes_total, spikes_neighbors in reader]
-
-    # Prepare expected data for comparison
-    expected_data = [(i, btw.spikes_input[i], btw.spikes_input[i]+btw.spikes_neighbours[i], btw.spikes_neighbours[i]) for i in range(len(btw.spikes_input))]
+    kwargs = {"grid_size": [6, 6], "height": 6, "max_distance": 6, "refractory_period": 6, "probability_of_spontaneous_activity": 0.06, "random_connection": False}
+    btw = BTW(**kwargs)
+    btw.spikes_neighbours = [1, 2, 3]
+    btw.spikes_total = [7, 5, 9]
+    btw.write_data(path="data/test")
+    data_read = load_data_csv(path="data/test")
 
     # Check if the data is correct
-    assert data_read == expected_data
+    assert data_read['grid_size'][0] == 36, "Grid size is not correct."
+    assert data_read['height'][0] == 6, "Height is not correct."
+    assert data_read['max_distance'][0] == 6, "Max distance is not correct."
+    assert data_read['refractory_period'][0] == 6, "Refractory period is not correct."
+    assert data_read['probability_of_spontaneous_activity'][0] == 0.06, "Probability of spontaneous activity is not correct."
+    assert data_read['random_connection'][0] == False, "Random connection is not correct."
+    assert data_read['spikes_total'].tolist() == [7, 5, 9], "Total spikes are not correct."
+    assert data_read['spikes_neighbours'].tolist() == [1, 2, 3], "Neighbour spikes are not correct."
+    assert data_read['spikes_input'].tolist() == [6, 3, 6], "Input spikes are not correct."
+
 
 def test_check_neighbors():
     grid_test_1 = np.array([[4, 0, 4], 
