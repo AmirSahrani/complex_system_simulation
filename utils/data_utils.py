@@ -46,17 +46,17 @@ def ref_avg_spike_density(data:pd.DataFrame, size:int, refractory_period:int) ->
     # avg_spake_density is defined as avg[spikes_total / the number of neurons] in each time step
     # return np.mean(data['spikes_total']) / float(size)**2
     # avg_spake_density is defined as avg[spikes_total / （the number of neurons - the sum of spikes in last timestep)] in each timestep
-    filtered_data = data[data['spikes_neighbours'] != 0]
     densities = []
 
-    for index, row in filtered_data.iterrows():
-        if index - refractory_period < 0:
-            refractory_sum = filtered_data.iloc[:index]['spikes_total'].sum()
-        else:
-            refractory_sum = filtered_data.iloc[index-refractory_period:index]['spikes_total'].sum()
-        if size**2 - refractory_sum > 0:
-            current_density = row['spikes_total'] / (size**2 - refractory_sum)
-            densities.append(current_density)
+    for index, row in data.iterrows():
+        if row['spikes_neighbours'] != 0:
+            if int(index) - refractory_period < 0:
+                refractory_sum = data.iloc[:int(index)]['spikes_total'].sum()
+            else:
+                refractory_sum = data.iloc[int(index)-refractory_period:int(index)]['spikes_total'].sum()
+            if size**2 - refractory_sum > 0:
+                current_density = row['spikes_total'] / (size**2 - refractory_sum)
+                densities.append(current_density)
     avg_density = np.mean(densities) if densities else 0
     return avg_density
 
@@ -66,7 +66,7 @@ def avg_spike_density(data:pd.DataFrame, size:int) -> float:
     # Only count rows where spikes_neighbours is not zero
     filtered_data = data[data['spikes_neighbours'] != 0]
     avg_density = np.mean(filtered_data['spikes_total']) / (size ** 2)
-    
+    print(avg_density)
     return avg_density
     
 def branching_prameter(df: pd.DataFrame) -> float:
@@ -84,11 +84,55 @@ def branching_prameter(df: pd.DataFrame) -> float:
         new_row_df = pd.DataFrame([new_row])
         df_copy = pd.concat([df_copy, new_row_df], ignore_index=True)
     
-    df_copy['next_spikes_neighbours'] = df_copy['spikes_neighbours'].shift(-1)
-    df_copy['ratio'] = df_copy['next_spikes_neighbours'] / df_copy['spikes_total'] 
-    valid_ratios = df_copy['ratio'][df_copy['spikes_total'] > 0]
-    valid_ratios_sum = valid_ratios.sum()
-    non_zero_spikes_total_count = (df_copy['spikes_total'] > 0).sum()
-    sigma = valid_ratios_sum / (non_zero_spikes_total_count-1) if non_zero_spikes_total_count > 0 else 0
+        df_copy['next_spikes_neighbours'] = df_copy['spikes_neighbours'].shift(-1)
+        df_copy['ratio'] = df_copy['next_spikes_neighbours'] / df_copy['spikes_total'] 
+        valid_ratios = df_copy['ratio'][df_copy['spikes_total'] > 0]
+        valid_ratios_sum = valid_ratios.sum()
+        non_zero_spikes_total_count = (df_copy['spikes_total'] > 0).sum()
+        sigma = valid_ratios_sum / (non_zero_spikes_total_count-1) if non_zero_spikes_total_count > 0 else 0
+    else:
+        df_copy['next_spikes_neighbours'] = df_copy['spikes_neighbours'].shift(-1)
+        df_copy['ratio'] = df_copy['next_spikes_neighbours'] / df_copy['spikes_total'] 
+        valid_ratios = df_copy['ratio'][df_copy['spikes_total'] > 0]
+        valid_ratios_sum = valid_ratios.sum()
+        non_zero_spikes_total_count = (df_copy['spikes_total'] > 0).sum()
+        sigma = valid_ratios_sum / non_zero_spikes_total_count if non_zero_spikes_total_count > 0 else 0
 
     return sigma
+
+def calculate_avalanche_distributions(df: pd.DataFrame) -> (list, list):
+    """
+    Calculate the avalanche size and duration distributions from a DataFrame.
+    
+    Parameters:
+    df (pd.DataFrame): A DataFrame with columns 'spikes_input', 'spikes_neighbours', 'spikes_total'.
+    
+    Returns:
+    tuple: Two lists, the first with the sizes of each avalanche, the second with the durations.
+    """
+    sizes = []
+    durations = []
+    avalanche_in_progress = False
+    current_size = 0
+    current_duration = 0
+
+    for index, row in df.iterrows():
+        # Check if an avalanche is starting
+        if row['spikes_input'] > 0 and row['spikes_neighbours'] == 0 and not avalanche_in_progress:
+            avalanche_in_progress = True
+            current_size = row['spikes_total']
+            current_duration = 1
+        # If already in an avalanche
+        elif avalanche_in_progress:
+            if row['spikes_neighbours'] > 0:
+                current_size += row['spikes_total']
+                current_duration += 1
+            # Check if the avalanche ends
+            if row['spikes_neighbours'] == 0:
+                avalanche_in_progress = False
+                sizes.append(current_size)
+                durations.append(current_duration)
+                current_size = 0
+                current_duration = 0
+
+    return sizes, durations

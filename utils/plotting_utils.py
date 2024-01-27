@@ -30,7 +30,7 @@ def phase_transition_plot(data: pd.DataFrame):
 def spike_density_plot(paths: list, size: int) -> None:
     """Plot the spike density."""
     plt.figure(figsize=(10, 8)) 
-    plt.title("Average spike density vs. branching parameters")
+    plt.title("Average spike density vs. branching ratio", fontsize=16)
     plt.xlabel("Branching Ratio", fontsize=14)
     plt.ylabel("Average Spike Density", fontsize=14)
     for path in paths:  
@@ -45,7 +45,7 @@ def spike_density_plot(paths: list, size: int) -> None:
 def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> None:
     """Plot the spike density."""
     plt.figure(figsize=(10, 8)) 
-    plt.title("Average spike density vs. branching parameters")
+    plt.title("Average spike density vs. Branching Ratio", fontsize=16)
     plt.xlabel("Branching Ratio", fontsize=14)
     plt.ylabel("Average Spike Density", fontsize=14)
     for path, refractory_period in zip(paths, refractory_periods):  
@@ -56,4 +56,16 @@ def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> 
         m = branching_prameter(df)
         plt.scatter(m, density)
     plt.show()
+    
+def powerlaw_size_plot(paths: list) -> None:
+    """Plot the powerlaw distribution of avalanche size."""
+    plt.figure(figsize=(10,8))
+    plt.xlabel("s / Avalanche Size", fontsize=14)
+    plt.ylabel("f(s)", fontsize=14)
+    plt.title("Distribution of Avalanche Size", fontsize=16)
+    for path in paths:
+        df = load_data_csv(path)
+        # Calculate the avalanche size distribution
         
+        
+    plt.show()

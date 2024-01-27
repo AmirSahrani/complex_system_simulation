@@ -168,24 +168,24 @@ def test_spike_density_withref():
     'spikes_neighbours': [1, 1, 2, 2, 3],
     'spikes_input': [1, 1, 1, 1, 2]})
     refractory_period = 2
-    a = avg_spike_density(df, 10, refractory_period)
+    a = ref_avg_spike_density(df, 10, refractory_period)
     assert a == 0.0313
 def test_branching_parameter():
     df = pd.DataFrame({
     'time_step':[0,1,2,3,4,5,6],
     'spikes_total': [0,2,0,1,4,4,0],
-    'spikes_neighbors': [0,0,0,0,2,3,0],
+    'spikes_neighbours': [0,0,0,0,2,3,0],
     'spikes_input': [0,2,0,1,2,1,0],
     })
     df_2 = pd.DataFrame({
-    'time_step':[0,1,2,3,4,5,6,7,8,9],
-    'spikes_total': [0,2,0,1,4,4,0,2,2,3],
-    'spikes_neighbors': [0,0,0,0,2,3,0,1,1,2],
-    'spikes_input': [0,2,0,1,2,1,0,1,1,1],
+    'time_step':[0,1,2,3,4,5,6,7,8],
+    'spikes_total': [0,2,0,1,4,4,0,1,2],
+    'spikes_neighbours': [0,0,0,0,2,3,0,0,1],
+    'spikes_input': [0,2,0,1,2,1,0,1,1],
     })
     
     a = branching_prameter(df)
     b = branching_prameter(df_2)
     assert a == 0.6875
-    assert b == 0.6875
+    assert b == 0.75
 
