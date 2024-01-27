@@ -44,20 +44,20 @@ def load_data_csv(path: str) -> pd.DataFrame:
 def avg_spike_density(data:pd.DataFrame, size:int, refractory_period: int) -> float:
     """Calculate the average spike density."""
     # avg_spake_density is defined as avg[spikes_total / the number of neurons] in each time step
-    #return np.mean(data['spikes_total']) / float(size)**2
+    return np.mean(data['spikes_total']) / float(size)**2
     # avg_spake_density is defined as avg[spikes_total / （the number of neurons - the sum of spikes in last timestep)] in each timestep
-    densities = []
+    # densities = []
 
-    for index, row in data.iterrows():
-        if index - refractory_period < 0:
-            refractory_sum = data.iloc[:index]['spikes_total'].sum()
-        else:
-            refractory_sum = data.iloc[index-refractory_period:index]['spikes_total'].sum()
-        if size**2 - refractory_sum > 0:
-            current_density = row['spikes_total'] / (size**2 - refractory_sum)
-            densities.append(current_density)
-    avg_density = np.mean(densities) if densities else 0
-    return avg_density
+    # for index, row in data.iterrows():
+    #     if index - refractory_period < 0:
+    #         refractory_sum = data.iloc[:index]['spikes_total'].sum()
+    #     else:
+    #         refractory_sum = data.iloc[index-refractory_period:index]['spikes_total'].sum()
+    #     if size**2 - refractory_sum > 0:
+    #         current_density = row['spikes_total'] / (size**2 - refractory_sum)
+    #         densities.append(current_density)
+    # avg_density = np.mean(densities) if densities else 0
+    # return avg_density
 
 def branching_prameter(df: pd.DataFrame) -> float:
     """
@@ -80,6 +80,3 @@ def branching_prameter(df: pd.DataFrame) -> float:
     sigma = valid_ratios_sum / non_zero_spikes_total_count if non_zero_spikes_total_count > 0 else 0
 
     return sigma
-
-
-    return paths
