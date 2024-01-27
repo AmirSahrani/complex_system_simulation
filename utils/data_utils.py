@@ -67,13 +67,15 @@ def branching_prameter(df: pd.DataFrame) -> float:
     """
     df_copy = df.copy()
 
-    #! Check if the last row(s) of df have zeros in spikes_neighbors(changed from spikes_total)
-    # If yes, truncate these rows
-    while df_copy['spikes_neighbors'].iloc[-1] != 0:
-        df_copy = df_copy.iloc[:-1]
+    # Check if the last number of spikes_neighbours is nonzero
+    # If it's nonzero, add a new row with 0 spikes_neighbours after it
+    if df_copy['spikes_neighbours'].iloc[-1] != 0:
+        new_row = {col: 0 for col in df_copy.columns}
+        new_row_df = pd.DataFrame([new_row])
+        df_copy = pd.concat([df_copy, new_row_df], ignore_index=True)
     
-    df_copy['next_spikes_neighbors'] = df_copy['spikes_neighbors'].shift(-1)
-    df_copy['ratio'] = df_copy['next_spikes_neighbors'] / df_copy['spikes_total'] 
+    df_copy['next_spikes_neighbours'] = df_copy['spikes_neighbours'].shift(-1)
+    df_copy['ratio'] = df_copy['next_spikes_neighbours'] / df_copy['spikes_total'] 
     valid_ratios = df_copy['ratio'][df_copy['spikes_total'] > 0]
     valid_ratios_sum = valid_ratios.sum()
     non_zero_spikes_total_count = (df_copy['spikes_total'] > 0).sum()

@@ -1,7 +1,8 @@
-import numpy as np
-from typing import List, Optional
-import matplotlib.pyplot as plt
 import random
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from typing import List, Optional
 from config import *
 
 
@@ -16,18 +17,19 @@ class BTW():
         self.visualize = visualize
         self.refractory_period = refractory_period
         self.refractory_matrix = np.zeros(grid_size)
-        self.spikes_input = []
+        self.spikes_total = []
         self.spikes_neighbours = []
         self.probability_of_spontaneous_activity = probability_of_spontaneous_activity
         self.random_connection = random_connection
+        self.max_distance = max_distance
 
-        self.cm = plt.get_cmap("viridis", self.max_height + 1)
-        self.setup_plot()
         if random_connection:
-            self.generate_rand_conn(max_distance)
+            self.generate_rand_conn()
         else:
-            self.neighbormap(max_distance)
-
+            self.neighbormap()
+        if self.visualize:
+            self.cm = plt.get_cmap("viridis", self.max_height + 1)
+            self.setup_plot()
 
 
     def init_grid(self, method: str, N: Optional[int], func: Optional[callable] = None) -> None:
@@ -57,14 +59,14 @@ class BTW():
             self.grid = func(self.grid)
 
 
-    def generate_rand_conn(self, max_distance) -> None:
+    def generate_rand_conn(self) -> None:
         """
         Generate random connections between neurons.
         """
         n = 0   # Number of connections
-        for x in range(int(np.floor(-max_distance)), int(np.ceil(max_distance+1))):
-            for y in range(int(np.floor(-max_distance)), int(np.ceil(max_distance+1))):
-                if x**2 + y**2 <= max_distance**2 and (x, y) != (0, 0):
+        for x in range(int(np.floor(-self.max_distance)), int(np.ceil(self.max_distance+1))):
+            for y in range(int(np.floor(-self.max_distance)), int(np.ceil(self.max_distance+1))):
+                if x**2 + y**2 <= self.max_distance**2 and (x, y) != (0, 0):
                     n += 1  # Count the number of connections
         N = self.grid.shape[0] * self.grid.shape[1] # Number of neurons
         numbers = list(range(N))    # List of numbers to randomly choose from
@@ -74,10 +76,6 @@ class BTW():
         conn_matrix = conn_matrix.astype(int)
         self.direction = conn_matrix
 
-
-    def calculate_avalanch_size(self):
-        pass
-    
 
     def add_grain(self) -> None:
         """Add a grain to a random point on the grid."""
@@ -90,11 +88,13 @@ class BTW():
         self.grid[not_in_ref & add_matrix] = self.max_height
 
 
-
-    def neighbormap(self, max_distance) -> None:
-        for x in range(int(np.floor(-max_distance)), int(np.ceil(max_distance+1))):
-            for y in range(int(np.floor(-max_distance)), int(np.ceil(max_distance+1))):
-                if x**2 + y**2 <= max_distance**2 and (x, y) != (0, 0):
+    def neighbormap(self) -> None:
+        """
+        Generate a relative position map of neighbors.
+        """
+        for x in range(int(np.floor(-self.max_distance)), int(np.ceil(self.max_distance+1))):
+            for y in range(int(np.floor(-self.max_distance)), int(np.ceil(self.max_distance+1))):
+                if x**2 + y**2 <= self.max_distance**2 and (x, y) != (0, 0):
                     self.direction.append((x, y))
 
 
@@ -129,21 +129,21 @@ class BTW():
         """
         Run the model for a number of steps.
         """
-        #!! TOCheck: @Terry I think this calculation is right. You can check it again.
         for i in range(steps):
-            # Initialize a variable for the current avalanche size
-            input_spikes = 0
+            # Initialize variables for avalanche statistics
+            total_spikes = 0
             neighbour_spikes = 0
 
-            # self.check_neighbors()
+            # Clear all active neurons from the previous step and update neighbor spikes
             self.check_neighbors()
-            neighbour_spikes = np.sum(self.grid > 0) 
+            neighbour_spikes = np.sum(self.grid != 0)
+
+            # Generate some spontaneous spikes randomly and update total spikes
             self.add_grain()
-            input_spikes = np.sum(self.grid != 0)
-            
-            
-            
-            self.spikes_input.append(input_spikes)
+            total_spikes = np.sum(self.grid != 0)
+
+            # Save the number of spikes for this step
+            self.spikes_total.append(total_spikes)
             self.spikes_neighbours.append(neighbour_spikes)
 
             if self.visualize:
@@ -156,26 +156,38 @@ class BTW():
         self.fig, self.ax = plt.subplots()
         self.fig.colorbar(plt.cm.ScalarMappable(cmap=self.cm), ax=self.ax)
 
+
     def plot(self) -> None:
         self.ax.imshow(self.grid, cmap=self.cm)
         plt.pause(0.001)
         self.ax.clear()
 
-    
-    
-    def write_data(self, path: str) -> None:
-        '''Writes single set of self.spikes_neighbors and self.spikes_total and spikes_input to one csv file'''
-        with open(path, "w") as f:
-            f.write("time_steps,spikes_input,spikes_total,spikes_neighbors\n")
-            for i in range(len(self.spikes_input)):
-                spikes_total = self.spikes_neighbours[i] + self.spikes_input[i]
-                f.write(f"{i}, {self.spikes_input[i]}, {spikes_total}, {self.spikes_neighbours[i]}\n")
 
+    def write_data(self, path: str) -> None:
+        """
+        Writes single set of self.spikes_neighbors, self.spikes_total and spikes_input to one csv file.
+        """
+        args = {"grid size": self.grid.shape[0], 
+                "height": self.max_height, 
+                "refractory period": self.refractory_period, 
+                "max distance": self.max_distance, 
+                "probability of spontaneous_activity": self.probability_of_spontaneous_activity, 
+                "random connection": self.random_connection}
+        args_df = pd.DataFrame(args, index=[0])
+
+        spikes_total, spikes_neighbours = np.array(self.spikes_total), np.array(self.spikes_neighbours)
+        results_df = pd.DataFrame({"spikes_total": spikes_total, 
+                                "spikes_neighbours": spikes_neighbours, 
+                                "spikes_input": spikes_total - spikes_neighbours})
+        
+        combined_df = pd.concat([args_df, results_df], axis=1)
+        combined_df.to_csv(path, index=True)
+        print("Data written to: ", path)
 
 
 
 if __name__ == "__main__":
-    btw = BTW(grid_size=[50, 50], **kwargs_round_spiral)
-    btw.init_grid("random", 4)
+    btw = BTW(grid_size=[50, 50], **kwargs_synchronous)
+    # btw.init_grid("random", 4)
     btw.run(10000)
-    #btw.write_data()
+    # btw.write_data("path")
