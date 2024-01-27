@@ -33,7 +33,7 @@ def spike_density_plot(paths: list, size: int) -> None:
     plt.title("Average spike density vs. branching parameters")
     plt.xlabel("Branching Ratio", fontsize=14)
     plt.ylabel("Average Spike Density", fontsize=14)
-    for path, refractory_period in zip(paths, refractory_periods):
+    for path in paths:  
         df = load_data_csv(path)
         # Plot the average spike density vs. the branching parameter
         density = avg_spike_density(df, size)
@@ -41,5 +41,19 @@ def spike_density_plot(paths: list, size: int) -> None:
         m = branching_prameter(df)
         plt.scatter(m, density)
     plt.show()
-        
+
+def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> None:
+    """Plot the spike density."""
+    plt.figure(figsize=(10, 8)) 
+    plt.title("Average spike density vs. branching parameters")
+    plt.xlabel("Branching Ratio", fontsize=14)
+    plt.ylabel("Average Spike Density", fontsize=14)
+    for path, refractory_period in zip(paths, refractory_periods):  
+        df = load_data_csv(path)
+        # Plot the average spike density vs. the branching parameter
+        density = ref_avg_spike_density(df, size,refractory_period)
+        print(density)
+        m = branching_prameter(df)
+        plt.scatter(m, density)
+    plt.show()
         
