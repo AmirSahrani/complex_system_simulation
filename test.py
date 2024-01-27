@@ -88,7 +88,7 @@ def test_writing():
     btw.init_grid("random", 5)
     # Initialize the BTW class with durations and sizes
     btw.spikes_input = [1, 2, 3]
-    btw.spikes_total = [7,5,9]
+    btw.spikes_neighbours = [7,5,9]
     # Write the grid to a file
     btw.write_data(path="data/spikes_btw.csv")
     # Read the csv data
@@ -98,7 +98,7 @@ def test_writing():
         data_read = [(int(time_steps), int(spikes_input), int(spikes_total), int(spikes_neighbors)) for time_steps, spikes_input, spikes_total, spikes_neighbors in reader]
 
     # Prepare expected data for comparison
-    expected_data = [(i, btw.spikes_input[i], btw.spikes_total[i], btw.spikes_total[i]- btw.spikes_input[i]) for i in range(len(btw.spikes_input))]
+    expected_data = [(i, btw.spikes_input[i], btw.spikes_input[i]+btw.spikes_neighbours[i], btw.spikes_neighbours[i]) for i in range(len(btw.spikes_input))]
 
     # Check if the data is correct
     assert data_read == expected_data
@@ -161,6 +161,15 @@ def test_avg_spike_density_noref():
     a = avg_spike_density(df, 10)
     assert a == 0.03
     
+def test_spike_density_withref():
+    df = pd.DataFrame({
+    'time_step': [0, 1, 2, 3, 4],
+    'spikes_total': [2,2,3,3,5],
+    'spikes_neighbours': [1, 1, 2, 2, 3],
+    'spikes_input': [1, 1, 1, 1, 2]})
+    refractory_period = 2
+    a = avg_spike_density(df, 10, refractory_period)
+    assert a == 0.0313
 def test_branching_parameter():
     df = pd.DataFrame({
     'time_step':[0,1,2,3,4,5,6],
@@ -170,8 +179,8 @@ def test_branching_parameter():
     })
     df_2 = pd.DataFrame({
     'time_step':[0,1,2,3,4,5,6,7,8,9],
-    'spikes_total': [0,2,0,1,4,4,0,1,2,3],
-    'spikes_neighbors': [0,0,0,0,2,3,0,0,1,2],
+    'spikes_total': [0,2,0,1,4,4,0,2,2,3],
+    'spikes_neighbors': [0,0,0,0,2,3,0,1,1,2],
     'spikes_input': [0,2,0,1,2,1,0,1,1,1],
     })
     

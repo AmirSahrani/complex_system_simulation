@@ -41,19 +41,24 @@ def load_data_csv(path: str) -> pd.DataFrame:
 
     # avg_spake_density is defined as avg[spikes_neighbours / the number of neurons] in each bin
     #return np.mean(data_bin['spikes_neighbours'] / size**2 ])
-def avg_spike_density(data:pd.DataFrame, size:int) -> float:
+def avg_spike_density(data:pd.DataFrame, size:int, refractory_period: int) -> float:
     """Calculate the average spike density."""
     # avg_spake_density is defined as avg[spikes_total / the number of neurons] in each time step
-    return np.mean(data['spikes_total']) / float(size)**2
+    #return np.mean(data['spikes_total']) / float(size)**2
     # avg_spake_density is defined as avg[spikes_total / （the number of neurons - the sum of spikes in last timestep)] in each timestep
-    #!! not sure whether it's needed
-    for time_step in data['timestep'].unique():
-        data.loc[data['timestep'] == time_step, 'refractory_sum'] = data.loc[
-            (data['timestep'] < time_step) & 
-            (data['timestep'] >= time_step - refractory_period),
-            ['spikes_neighbours', 'spikes_input']
-        ].sum().sum()
-    
+    densities = []
+
+    for index, row in data.iterrows():
+        if index - refractory_period < 0:
+            refractory_sum = data.iloc[:index]['spikes_total'].sum()
+        else:
+            refractory_sum = data.iloc[index-refractory_period:index]['spikes_total'].sum()
+        if size**2 - refractory_sum > 0:
+            current_density = row['spikes_total'] / (size**2 - refractory_sum)
+            densities.append(current_density)
+    avg_density = np.mean(densities) if densities else 0
+    return avg_density
+
 def branching_prameter(df: pd.DataFrame) -> float:
     """
     Calculates the branching parameter sigma.
@@ -62,7 +67,7 @@ def branching_prameter(df: pd.DataFrame) -> float:
     """
     df_copy = df.copy()
 
-    # Check if the last row(s) of df have zeros in spikes_neighbors
+    #! Check if the last row(s) of df have zeros in spikes_neighbors(changed from spikes_total)
     # If yes, truncate these rows
     while df_copy['spikes_neighbors'].iloc[-1] != 0:
         df_copy = df_copy.iloc[:-1]

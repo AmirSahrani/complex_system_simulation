@@ -135,17 +135,14 @@ class BTW():
             input_spikes = 0
             neighbour_spikes = 0
 
-
-            # Save the current state of the gride before adding grains
-            prev_grid_state = np.copy(self.grid)
-
             # self.check_neighbors()
-            self.add_grain()
-
-            input_spikes = np.sum(self.grid != 0)
-            
             self.check_neighbors()
             neighbour_spikes = np.sum(self.grid > 0) 
+            self.add_grain()
+            input_spikes = np.sum(self.grid != 0)
+            
+            
+            
             self.spikes_input.append(input_spikes)
             self.spikes_neighbours.append(neighbour_spikes)
 
