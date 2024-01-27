@@ -25,7 +25,8 @@ def phase_transition_plot(data: pd.DataFrame):
     plt.ylabel("ORDER PARAMETER") #EITHER AVALANCHE SIZE OR DURATION
     plt.title("Phase transition")
     plt.show()
-    
+
+
 def spike_density_plot(paths: list, size: int) -> None:
     """Plot the spike density."""
     plt.figure(figsize=(10, 8)) 
@@ -36,9 +37,7 @@ def spike_density_plot(paths: list, size: int) -> None:
         df = load_data_csv(path)
         # Plot the average spike density vs. the branching parameter
         density = avg_spike_density(df, size)
-        print(density)
         m = branching_prameter(df)
-        print(m)
         plt.scatter(m, density)
     plt.show()
         
