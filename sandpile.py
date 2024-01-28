@@ -163,6 +163,36 @@ class BTW():
         self.ax.clear()
 
 
+    def collect_raster_data(self, steps: int, path: str) -> None:
+        """
+        Collects raster data from the model and writes it to a csv file.
+        The dimension of `raster_data` is 2, and its shape is steps*N^2, where N^2 is the number of neurons. Each list is a raster of the grid at a step, where neighbour spike, input spike and no spike are marked as 2, 1 and 0 respectively.
+        """
+        raster_data = []
+        for i in range(steps):
+            self.check_neighbors()
+            current_raster = (self.grid != 0).astype(int)   # neighbour spikes = 1 and input spikes = 0
+            self.add_grain()
+            current_raster += (self.grid != 0).astype(int)    # neighbour spikes = 2 and input spikes = 1
+            self.refractory_matrix[self.refractory_matrix > 0] -= 1
+            current_raster = np.array(current_raster).flatten()
+            raster_data.append(current_raster)
+        raster_data = np.array(raster_data)
+
+        # Save the parameters     
+        raster_df = pd.DataFrame(raster_data)
+        raster_df['grid_size'] = self.grid.shape[0] * self.grid.shape[1]
+        raster_df['height'] = self.max_height
+        raster_df['max_distance'] = self.max_distance
+        raster_df['refractory_period'] = self.refractory_period
+        raster_df['probability_of_spontaneous_activity'] = self.probability_of_spontaneous_activity
+        raster_df['random_connection'] = self.random_connection
+
+        # Write to csv
+        raster_df.to_csv(path, index=True)
+        print("Data written to: ", path)
+
+
     def write_data(self, path: str) -> None:
         """
         Writes single set of self.spikes_neighbors, self.spikes_total and spikes_input to one csv file.
@@ -187,7 +217,8 @@ class BTW():
 
 
 if __name__ == "__main__":
-    btw = BTW(grid_size=[50, 50])
+    btw = BTW(grid_size=[20, 20])
     # btw.init_grid("random", 4)
-    btw.run(10000)
-    btw.write_data("data/test")
+    # btw.run(10000)
+    # btw.write_data("data/test")
+    btw.collect_raster_data(1000, "data/test_raster")

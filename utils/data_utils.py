@@ -13,7 +13,7 @@ def load_data_txt(path: str) -> list:
 
 def load_data_csv(path: str) -> pd.DataFrame:
     """Load data from a CSV file."""
-    return pd.read_csv(path)
+    return pd.read_csv(path, index_col=0)
 
 # def to_bin(data: pd.DataFrame, bin_size: int) -> pd.DataFrame:
 #     """Convert data(timestep,spikes_input, spikes_neighbours) to in bin units."""
@@ -150,3 +150,53 @@ def avalanche_distributions(df: pd.DataFrame) -> (list, list):
 
     return sizes, durations
 
+
+def one_dim_neighbormap(max_distance: float, N: int) -> list:
+    """
+    Generate a 1D relative position map of neighbors.
+    """
+    neighbour_map = []
+    for x in range(int(np.floor(-max_distance)), int(np.ceil(max_distance+1))):
+        for y in range(int(np.floor(-max_distance)), int(np.ceil(max_distance+1))):
+            if x**2 + y**2 <= max_distance**2 and (x, y) != (0, 0):
+                one_dim_index = N * x + y
+                neighbour_map.append(one_dim_index)
+    return neighbour_map
+
+
+def raster_to_transmission(raster_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Convert the raster data to transmission data.
+    """
+    assert raster_df['random_connection'].iloc[0] == False, "Random connection not supported yet."
+    df = raster_df.copy()
+
+    # Get the neighbour map
+    max_distance = df['max_distance'].iloc[0]
+    N = np.sqrt(df['grid_size'].iloc[0])
+    neighbour_map = one_dim_neighbormap(max_distance, N)
+
+    # Drop parameter columns
+    param_cols = ['max_distance', 'grid_size', 'random_connection', 'refractory_period', 'height', 'probability_of_spontaneous_activity']
+    df = df.drop(columns=param_cols)
+
+    transmission = []
+    for index, row in df.iterrows():    # Loop through all time steps
+        not_last_row = index != len(df) - 1
+        active_neurons_index = [int(col) for col in df.columns if row[col] != 0]
+        if not_last_row:
+            next_row = df.iloc[index + 1]
+            for i in active_neurons_index:  # Loop through all active neurons, i is the 1D index of the active neuron
+                for j in neighbour_map:    # Loop through all neighbors of the active neuron
+                    n = int(i + j)   # 1D index of the neighbor
+                    if n >= 0 and n < len(row) and next_row[n] == 2:
+                        transmission.append([index, i, n])  # [time, active neuron -> neighbor]
+    return pd.DataFrame(transmission, columns=['time', 'ancestor', 'descendant'])
+
+
+def transmission_to_avalanche(transmission_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Convert the transmission data to avalanche data.
+    """
+    df = transmission_df.copy()
+    
