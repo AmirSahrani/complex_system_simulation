@@ -34,6 +34,9 @@ def spike_density_plot(paths: list, size: int) -> None:
     plt.title("Average spike density vs. branching ratio", fontsize=16)
     plt.xlabel("Branching Ratio", fontsize=14)
     plt.ylabel("Average Spike Density", fontsize=14)
+    plt.xlim(0, 5)
+    plt.xticks(np.arange(0, 5.2, 0.2))
+    plt.grid(True)
     for path in paths:  
         df = load_data_csv(path)
         # Plot the average spike density vs. the branching parameter
@@ -49,6 +52,9 @@ def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> 
     plt.title("Average spike density vs. Branching Ratio", fontsize=16)
     plt.xlabel("Branching Ratio", fontsize=14)
     plt.ylabel("Average Spike Density", fontsize=14)
+    plt.xlim(0, 5)
+    plt.xticks(np.arange(0, 5.2, 0.2))
+    plt.grid(True)
     for path, refractory_period in zip(paths, refractory_periods):  
         df = load_data_csv(path)
         # Plot the average spike density vs. the branching parameter
@@ -58,26 +64,37 @@ def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> 
         plt.scatter(m, density)
     plt.show()
     
-def powerlaw_avalanche_plots(paths: list) -> None:
+def powerlaw_avalanche_plots(paths: list, method: list, thresh_m: float) -> None:
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
-    
+
     for path in paths:
-        df = load_data_csv(path)
-        sizes, durations = avalanche_distributions(df)
-        sizes = [size for size in sizes if size > 0]
-        durations = [duration for duration in durations if duration > 0]
-
-        print(f"Sizes for path {path}: {sizes}")  # Debugging line
-        print(f"Durations for path {path}: {durations}")  # Debugging line
-
-        fit_sizes = powerlaw.Fit(sizes)
-        fit_sizes.power_law.plot_pdf(ax=ax1, color=np.random.rand(3,), linestyle='-', label=f'Fit size: {path}')
-        powerlaw.plot_pdf(sizes, ax=ax1, color=np.random.rand(3,), linestyle='--', label=f'Data size: {path}')
+        try:
+            df = load_data_csv(path)
+            sizes, durations = avalanche_distributions(df)
+            sizes = [size for size in sizes if size > 0]
+            durations = [duration for duration in durations if duration > 0]
         
-        fit_durations = powerlaw.Fit(durations)
-        fit_durations.power_law.plot_pdf(ax=ax2, color=np.random.rand(3,), linestyle='-', label=f'Fit duration: {path}')
-        powerlaw.plot_pdf(durations, ax=ax2, color=np.random.rand(3,), linestyle='--', label=f'Data duration: {path}')
-        
+            if sizes and durations:
+                if method == 'fit':
+                    if abs(branching_prameter(df) - 1) < thresh_m:
+                        fit_sizes = powerlaw.Fit(sizes)
+                        fit_sizes.power_law.plot_pdf(ax=ax1, color=np.random.rand(3,), linestyle='-')
+                        fit_durations = powerlaw.Fit(durations)
+                        fit_durations.power_law.plot_pdf(ax=ax2, color=np.random.rand(3,), linestyle='-')
+                elif method == 'plot':
+                    if abs(branching_prameter(df) - 1) < thresh_m:
+                        powerlaw.plot_pdf(sizes, ax=ax1, color=np.random.rand(3,), linestyle='--')
+                        powerlaw.plot_pdf(durations, ax=ax2, color=np.random.rand(3,), linestyle='--')
+                elif method == 'scatter':
+                    ax1.scatter(range(len(sizes)), sizes, color=np.random.rand(3,), linestyle='--')
+                    ax2.scatter(range(len(durations)), durations, color=np.random.rand(3,), linestyle='--')
+                elif method == 'histogram':
+                    ax1.hist(sizes, bins=len(sizes), log=True, color=np.random.rand(3,), linestyle='--')
+                    ax2.hist(durations, bins=len(durations), log=True, color=np.random.rand(3,), linestyle='--')
+            else:
+                print(f"{path} has no enough data")
+        except Exception as e:
+            print(f"Error processing file {path}: {e}")
 
     
     ax1.set_xlabel("Size (s)", fontsize=14)
@@ -96,3 +113,6 @@ def powerlaw_avalanche_plots(paths: list) -> None:
     
     plt.tight_layout()
     plt.show()
+
+
+        
