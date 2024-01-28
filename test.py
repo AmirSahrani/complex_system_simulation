@@ -188,3 +188,18 @@ def test_branching_parameter():
     assert a == 0.6875
     assert b == 0.75
 
+def avalanche_size_duration(df):
+    # Implementation of the avalanche_size_duration function
+    pass
+
+def test_avalanche_size_duration():
+    df = pd.DataFrame({
+        'spikes_total': [0,2,0,1,4,4,0,1,2,3],
+        'spikes_neighbours': [0,0,0,0,2,3,0,0,1,2],
+        'spikes_input': [0,2,0,1,2,1,0,1,1,1],
+    })
+    expected_size = [9, 6]
+    expected_duration = [3,3]
+    actual_size, actual_duration = avalanche_distributions(df)
+    assert actual_size == expected_size and actual_duration == expected_duration
+    

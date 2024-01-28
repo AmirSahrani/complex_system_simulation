@@ -100,16 +100,8 @@ def branching_prameter(df: pd.DataFrame) -> float:
 
     return sigma
 
-def calculate_avalanche_distributions(df: pd.DataFrame) -> (list, list):
-    """
-    Calculate the avalanche size and duration distributions from a DataFrame.
-    
-    Parameters:
-    df (pd.DataFrame): A DataFrame with columns 'spikes_input', 'spikes_neighbours', 'spikes_total'.
-    
-    Returns:
-    tuple: Two lists, the first with the sizes of each avalanche, the second with the durations.
-    """
+
+def avalanche_distributions(df: pd.DataFrame) -> (list, list):
     sizes = []
     durations = []
     avalanche_in_progress = False
@@ -117,22 +109,44 @@ def calculate_avalanche_distributions(df: pd.DataFrame) -> (list, list):
     current_duration = 0
 
     for index, row in df.iterrows():
-        # Check if an avalanche is starting
-        if row['spikes_input'] > 0 and row['spikes_neighbours'] == 0 and not avalanche_in_progress:
-            avalanche_in_progress = True
-            current_size = row['spikes_total']
-            current_duration = 1
+        # Start of DataFrame or end of an avalanche
+        if (index == 0 or not avalanche_in_progress) and row['spikes_input'] > 0 and row['spikes_neighbours'] == 0:
+            # Look ahead to check if the next row has spikes_neighbours > 0 to confirm the start of an avalanche
+            if index < len(df) - 1 and df.iloc[index + 1]['spikes_neighbours'] > 0:
+                avalanche_in_progress = True
+                current_size = row['spikes_total']  # Start counting the size
+                current_duration = 1  # Reset duration to 1 for a new avalanche
+            continue  # Skip to the next iteration
+        
         # If already in an avalanche
-        elif avalanche_in_progress:
+        if avalanche_in_progress:
+            # If there are neighbours in the current timestep, add to the size
             if row['spikes_neighbours'] > 0:
                 current_size += row['spikes_total']
                 current_duration += 1
-            # Check if the avalanche ends
+            # If there are no neighbours, it's the end of the current avalanche
             if row['spikes_neighbours'] == 0:
                 avalanche_in_progress = False
                 sizes.append(current_size)
                 durations.append(current_duration)
                 current_size = 0
                 current_duration = 0
+                # Immediately check if this is also the start of a new avalanche
+                if row['spikes_input'] > 0:
+                    if index < len(df) - 1 and df.iloc[index + 1]['spikes_neighbours'] > 0:
+                        avalanche_in_progress = True
+                        current_size = row['spikes_total']
+                        current_duration = 1
+                else:
+                    avalanche_in_progress = False
+    
+    # Check if an avalanche was in progress at the end and didn't get a chance to end
+    if avalanche_in_progress:
+        sizes.append(current_size)
+        durations.append(current_duration)
+        
+    sizes = [size for size in sizes if size > 0]
+    durations = [duration for duration in durations if duration > 0]
 
     return sizes, durations
+

@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 from .data_utils import *
+import powerlaw
 
 
 def power_law_plot(data, data_type='size'):
@@ -57,15 +58,41 @@ def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> 
         plt.scatter(m, density)
     plt.show()
     
-def powerlaw_size_plot(paths: list) -> None:
-    """Plot the powerlaw distribution of avalanche size."""
-    plt.figure(figsize=(10,8))
-    plt.xlabel("s / Avalanche Size", fontsize=14)
-    plt.ylabel("f(s)", fontsize=14)
-    plt.title("Distribution of Avalanche Size", fontsize=16)
+def powerlaw_avalanche_plots(paths: list) -> None:
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+    
     for path in paths:
         df = load_data_csv(path)
-        # Calculate the avalanche size distribution
+        sizes, durations = avalanche_distributions(df)
+        sizes = [size for size in sizes if size > 0]
+        durations = [duration for duration in durations if duration > 0]
+
+        print(f"Sizes for path {path}: {sizes}")  # Debugging line
+        print(f"Durations for path {path}: {durations}")  # Debugging line
+
+        fit_sizes = powerlaw.Fit(sizes)
+        fit_sizes.power_law.plot_pdf(ax=ax1, color=np.random.rand(3,), linestyle='-', label=f'Fit size: {path}')
+        powerlaw.plot_pdf(sizes, ax=ax1, color=np.random.rand(3,), linestyle='--', label=f'Data size: {path}')
         
+        fit_durations = powerlaw.Fit(durations)
+        fit_durations.power_law.plot_pdf(ax=ax2, color=np.random.rand(3,), linestyle='-', label=f'Fit duration: {path}')
+        powerlaw.plot_pdf(durations, ax=ax2, color=np.random.rand(3,), linestyle='--', label=f'Data duration: {path}')
         
+
+    
+    ax1.set_xlabel("Size (s)", fontsize=14)
+    ax1.set_ylabel("PDF", fontsize=14)
+    ax1.set_title("Avalanche Size Distribution", fontsize=16)
+    ax1.set_xscale('log')
+    ax1.set_yscale('log')
+    ax1.legend()
+    
+    ax2.set_xlabel("Duration", fontsize=14)
+    ax2.set_ylabel("PDF", fontsize=14)
+    ax2.set_title("Avalanche Duration Distribution", fontsize=16)
+    ax2.set_xscale('log')
+    ax2.set_yscale('log')
+    ax2.legend()
+    
+    plt.tight_layout()
     plt.show()
