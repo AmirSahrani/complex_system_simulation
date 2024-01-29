@@ -3,6 +3,8 @@ import csv as csv
 import pandas as pd
 from sandpile import BTW
 import os
+
+
 def load_data_txt(path: str) -> list:
     """Load data from a file."""
     with open(path, "r") as f:
@@ -194,9 +196,105 @@ def raster_to_transmission(raster_df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(transmission, columns=['time', 'ancestor', 'descendant'])
 
 
-def transmission_to_avalanche(transmission_df: pd.DataFrame) -> pd.DataFrame:
+def merge_trees(tree1: list, tree2: list) -> list:
+    """
+    Merge two trees.
+    """
+    # Make sure tree1 is the smaller tree
+    if len(tree1) > len(tree2):
+        tree1, tree2 = tree2, tree1
+    tree1 = tree1[::-1]  
+    tree2 = tree2[::-1]
+    
+    # Merge tree1 and tree2 from bottom up
+    new_tree = tree2.copy()
+    for i, row in enumerate(tree1):
+        for node in row:
+            if node not in new_tree[i]:
+                new_tree[i].append(node)
+
+    return new_tree[::-1]
+
+
+def transmission_to_avalanche(transmission_df: pd.DataFrame) -> list:
     """
     Convert the transmission data to avalanche data.
     """
     df = transmission_df.copy()
-    
+    avalanches = []
+    trees = []
+
+    for i, t in enumerate(df['time'].unique()):     # Loop through all time steps
+        current_df = df[df['time']==t]
+        merge_operations = []
+
+        for _, row in current_df.iterrows():    # Loop through all transmissions in the current time step
+            target_tree_index = []
+            for j, tree_dic in enumerate(trees):    # Loop through all trees
+                # If the tree is from a previous time step, update the time step and add a new row to the tree
+                if tree_dic['time'] != t:
+                    tree_dic['time'] = t
+                    tree_dic['tree'].append([])
+                # If the ancestor of this transmission is in the tree's last time step, add the descendant to the tree
+                if row['ancestor'] in tree_dic['tree'][-2]:
+                    tree_dic['tree'][-1].append(row['descendant'])
+                    target_tree_index.append(j)
+            # If the ancestor of this transmission is not in any tree, create a new tree
+            if len(target_tree_index) == 0:
+                trees.append({'time': t, 'tree': [[row['ancestor']], [row['descendant']]]})
+            # Record merge operations if the ancestor is in more than one tree
+            elif len(target_tree_index) > 1 and target_tree_index not in merge_operations:
+                merge_operations.append(target_tree_index)
+
+        # Define a set to store the indices of trees to remove after merging
+        trees_to_remove = set()
+
+        # Merge trees
+        for indices in merge_operations:
+            # Merge trees and update the list
+            merged_tree = trees[indices[0]]['tree']
+            for index in indices[1:]:
+                merged_tree = merge_trees(merged_tree, trees[index]['tree'])
+                # Add the index of the tree to the remove set
+                trees_to_remove.add(index)
+
+            # Update the first tree with the merged tree
+            trees[indices[0]]['tree'] = merged_tree
+
+        # Remove trees from the end of the list to avoid index errors
+        for index in sorted(trees_to_remove, reverse=True):
+            trees.pop(index)
+
+        # Check if any trees have no descendant in this time step and remove them
+        trees_to_remove = []
+        for j, tree_dic in enumerate(trees):
+            # If the tree is empty, record its index
+            if not tree_dic['tree'][-1]:
+                trees_to_remove.append(j)
+
+        # Remove trees from the end of the list to avoid index errors
+        for index in sorted(trees_to_remove, reverse=True):
+            complete_tree_dic = trees.pop(index)
+            complete_tree_dic['tree'].pop(-1)   # Remove the empty row
+            complete_avalanche = [len(row) for row in complete_tree_dic['tree']]
+            avalanches.append(complete_avalanche)
+
+    # Check if any trees are left at the end
+    if trees:
+        for tree_dic in trees:
+            complete_avalanche = [len(row) for row in tree_dic['tree']]
+            avalanches.append(complete_avalanche)
+
+    return avalanches
+
+
+def avalanche_to_statistics(avalanches: list) -> pd.DataFrame:
+    """
+    Convert the avalanche data to avalanche size and duration.
+    """
+    statistics = []
+    for avalanche in avalanches:
+        size = len(avalanche)
+        duration = sum(avalanche)
+        statistics.append([size, duration])
+    return pd.DataFrame(statistics, columns=['size', 'duration'])

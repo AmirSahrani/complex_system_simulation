@@ -217,8 +217,8 @@ class BTW():
 
 
 if __name__ == "__main__":
-    btw = BTW(grid_size=[20, 20])
+    btw = BTW(grid_size=[50, 50], **kwargs_oscillatory)
     # btw.init_grid("random", 4)
-    # btw.run(10000)
+    btw.run(10000)
     # btw.write_data("data/test")
-    btw.collect_raster_data(1000, "data/test_raster")
+    # btw.collect_raster_data(1000, "data/test_raster")
