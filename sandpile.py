@@ -10,7 +10,7 @@ class BTW():
     """Bak-Tang-Wiesenfeld sandpile model.
     Initialize with a grid size, model will be initialized with all zeros.
     """
-    def __init__(self, grid_size: List, height: int=3, visualize: bool=False, max_distance: float=3, refractory_period: int=3, probability_of_spontaneous_activity: float=0.02, random_connection: bool=False) -> None:
+    def __init__(self, grid_size: List, height: int=2, visualize: bool=False, max_distance: float=3, refractory_period: int=3, probability_of_spontaneous_activity: float=0.02, random_connection: bool=False) -> None:
         self.grid = np.zeros(grid_size)
         self.max_height = height
         self.direction = []
@@ -131,6 +131,7 @@ class BTW():
 
             # Clear all active neurons from the previous step and update neighbor spikes
             self.check_neighbors()
+            # Question: HOw do we now these non-zero grids are neighbour spikes, and not added grain from the previous step?
             neighbour_spikes = np.sum(self.grid != 0)
 
             # Generate some spontaneous spikes randomly and update total spikes
