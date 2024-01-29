@@ -203,3 +203,16 @@ def test_avalanche_size_duration():
     actual_size, actual_duration = avalanche_distributions(df)
     assert actual_size == expected_size and actual_duration == expected_duration
     
+def test_transmission_to_avalanche():
+    df = pd.DataFrame({
+        'time': [0, 0, 0, 1, 1, 1, 1, 1, 2, 2],
+        'ancestor': [168, 279, 13, 15, 15, 22, 22, 22, 26, 26],
+        'descendant': [15, 22, 22, 199, 198, 116, 26, 204, 11, 71],
+    })
+    expected = [[1, 1, 2], [2, 1, 3, 2]]
+    actual = transmission_to_avalanche(df)
+    assert actual == expected
+
+def test_avalanche_to_statistics():
+    # TODO
+    pass
