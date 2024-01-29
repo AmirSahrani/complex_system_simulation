@@ -37,24 +37,19 @@ class BTW():
         Initialize the grid with a method.
         Methods can be:
             Random: Randomly assign N grains to random points on the grid.
-            Center: Assign N grains to the center of the grid.
             Custom: Use a custom function to initialize the grid.
         """
-        assert method in ["random", "center", "custom"], "Invalid method."
+        assert method in ["random", "custom"], "Invalid method."
         assert N > 0, "N must be positive."
 
         if any(sum(self.grid)):
             self.grid = np.zeros(self.grid.shape)
-
-        grid_points = (np.random.randint(0, self.grid.shape[0], size=(N)), np.random.randint(0, self.grid.shape[0], size=(N)))
+        if any(sum(self.refractory_matrix)):
+            self.refractory_matrix = np.zeros(self.grid.shape)
+            
         if method == "random":
+            grid_points = (random.sample(range(self.grid.shape[0]), N), random.sample(range(self.grid.shape[1]), N))
             self.grid[grid_points[0], grid_points[1]] = self.max_height
-        elif method == "center":
-            for i in range(N):
-                self.grid[self.grid.shape[0] // 2, self.grid.shape[1] // 2] = self.max_height
-                self.check_neighbors()
-                if self.visualize:
-                    self.plot()
         elif method == "custom":
             self.grid = func(self.grid)
 

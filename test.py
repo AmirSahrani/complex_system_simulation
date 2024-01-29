@@ -12,16 +12,12 @@ def test_init_grid():
     Currently the random method relies on not accidentally picking the same point twice.
     '''
     btw = BTW([10, 10], 4)
-    btw = BTW([10, 10], 4)
     btw.init_grid("random", 5)
     assert np.where(btw.grid > 0)[0].shape[0] == 5, "Grid not initialized correctly using random method."
 
-    btw.init_grid("center", 5)
-    assert np.sum(btw.grid) == 5, "Grid not initialized correctly using center method."
-
-    btw.init_grid("custom", 5, lambda x: x + 1)
+    btw.init_grid("custom", 5, lambda x: x + 5)
     grid_surface_area = btw.grid.shape[0] * btw.grid.shape[1]
-    assert np.sum(btw.grid) == grid_surface_area, "Grid not initialized correctly using custom method."
+    assert np.sum(btw.grid) == 5 * grid_surface_area, "Grid not initialized correctly using custom method."
 
 
 def test_add_grain():
@@ -168,7 +164,8 @@ def test_spike_density_withref():
     'spikes_input': [1, 1, 1, 1, 2]})
     refractory_period = 2
     a = ref_avg_spike_density(df, 10, refractory_period)
-    assert a == 0.0313
+    assert np.round(a, 4) == 0.0313
+
 def test_branching_parameter():
     df = pd.DataFrame({
     'time_step':[0,1,2,3,4,5,6],
@@ -214,5 +211,7 @@ def test_transmission_to_avalanche():
     assert actual == expected
 
 def test_avalanche_to_statistics():
-    # TODO
-    pass
+    avalanches = [[1, 3, 2], [2, 1, 2, 1], [1, 1, 2, 1, 1]]
+    expected = pd.DataFrame({'size': [6, 6, 6], 'duration': [3, 4, 5]})
+    actual = avalanche_to_statistics(avalanches)
+    assert (actual == expected).all().all()
