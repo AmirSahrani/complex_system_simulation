@@ -294,7 +294,7 @@ def avalanche_to_statistics(avalanches: list) -> pd.DataFrame:
     """
     statistics = []
     for avalanche in avalanches:
-        size = len(avalanche)
-        duration = sum(avalanche)
+        size = sum(avalanche)
+        duration = len(avalanche)
         statistics.append([size, duration])
     return pd.DataFrame(statistics, columns=['size', 'duration'])
