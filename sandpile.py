@@ -159,7 +159,7 @@ class BTW():
         self.ax.clear()
 
 
-    def collect_raster_data(self, steps: int, path: str) -> None:
+    def collect_raster_data(self, steps: int) -> pd.DataFrame:
         """
         Collects raster data from the model and writes it to a csv file.
         The dimension of `raster_data` is 2, and its shape is steps*N^2, where N^2 is the number of neurons. Each list is a raster of the grid at a step, where neighbour spike, input spike and no spike are marked as 2, 1 and 0 respectively.
@@ -184,9 +184,7 @@ class BTW():
         raster_df['probability_of_spontaneous_activity'] = self.probability_of_spontaneous_activity
         raster_df['random_connection'] = self.random_connection
 
-        # Write to csv
-        raster_df.to_csv(path, index=True)
-        print("Data written to: ", path)
+        return raster_df
 
 
     def write_data(self, path: str) -> None:
