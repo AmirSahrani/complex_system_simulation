@@ -1,5 +1,6 @@
 from typing import Callable
 from tqdm import tqdm
+import numpy as np
 
 
 def simulate(simulation: Callable, n_runs: int, duration: int, **kwargs):
@@ -11,3 +12,12 @@ def simulate(simulation: Callable, n_runs: int, duration: int, **kwargs):
         sim.reset()
     return results
         
+def get_density(data):
+    density = []
+    values = np.unique(data)
+    for value in values:
+        density.append(np.sum(data == value) / len(data))
+    return values,density
+
+def closest_index_to_value(array, value):
+    return np.argmin(np.abs(array - value))
