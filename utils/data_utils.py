@@ -305,8 +305,6 @@ def str_to_list(s):
         return s
     if s == '[]':
         return []
-    elif ',' not in s:
-        return [float(s)]
     return [float(x) for x in s.strip('[]').split(',')]
 
 def write_data(data: List, file_name: str) -> None:

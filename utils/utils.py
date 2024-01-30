@@ -5,10 +5,18 @@ import numpy as np
 
 def simulate(simulation: Callable, n_runs: int, duration: int, **kwargs):
     results = []
-    for _ in tqdm(range(n_runs)):
+    for i in range(n_runs):
         sim = simulation(**kwargs)
         sim.run(duration)
-        results.append([sim.evalanche_size, sim.evalanche_duration])
+        results.append({
+            "run": i,
+            "evalanche_size": sim.evalanche_size,
+            "evalanche_duration": sim.evalanche_duration,
+            "density": np.mean(sim.density),
+            'branching_ratio': kwargs['branching_ratio'],
+            'emperical_branching_ratio': np.mean(sim.branching)
+        })
+        print(results[i]['density'])
         sim.reset()
     return results
         
