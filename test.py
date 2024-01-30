@@ -1,6 +1,8 @@
 from sandpile import BTW
 from utils.data_utils import *
 from pandas.testing import assert_frame_equal
+from branching import *
+from utils.utils import *  
 import numpy as np
 import pandas as pd
 import pytest
@@ -215,3 +217,27 @@ def test_avalanche_to_statistics():
     expected = pd.DataFrame({'size': [6, 6, 6], 'duration': [3, 4, 5]})
     actual = avalanche_to_statistics(avalanches)
     assert (actual == expected).all().all()
+
+
+def test_init_network():
+    network = BranchingNeurons(20,3,1,False)
+    assert len(network.neurons)== 20, "Incorrect number of neurons"
+    assert all(len(neuron.neighbors) <= 3 for neuron in network.neurons), "Incorrect number of neighbors"
+
+
+def test_neuron():
+    branching_ratio = 3
+    neuron = Neuron((1,1),branching_ratio)
+    neuron.neighbors = [Neuron((1,2),3), Neuron((2,1),3), Neuron((2,2),3)]
+    neuron.generate_probabilities()
+    assert len(neuron.probabilities) == 3, "Incorrect number of probabilities"
+    assert np.isclose(sum(neuron.probabilities.values()), branching_ratio), "Probabilities don't sum to branching ratio"
+
+
+def test_density():
+    array = [2,2,2,1,1,3]
+    true_density = [2/6, 3/6, 1/6]
+    values, density = get_density(array)
+    assert all([x == y for x,y in zip([1,2,3], values)]), "Incorrect values"
+    for true, test in zip(true_density, density):
+        assert np.isclose(true, test), "Incorrect density"

@@ -298,3 +298,12 @@ def avalanche_to_statistics(avalanches: list) -> pd.DataFrame:
         duration = len(avalanche)
         statistics.append([size, duration])
     return pd.DataFrame(statistics, columns=['size', 'duration'])
+
+def str_to_list(s):
+    if not isinstance(s, str):
+        return s
+    if s == '[]':
+        return []
+    elif ',' not in s:
+        return [float(s)]
+    return [float(x) for x in s.strip('[]').split(',')]
