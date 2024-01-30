@@ -218,7 +218,7 @@ class BTW():
 
 
 if __name__ == "__main__":
-    btw = BTW(grid_size=[50, 50], **kwargs_oscillatory)
+    btw = BTW(grid_size=[50, 50], **kwargs_round_spiral)
     # btw.init_grid("random", 4)
     btw.run(10000)
     # btw.write_data("data/test")
