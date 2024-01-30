@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from .data_utils import *
 import powerlaw
+from typing import Optional
+from branching import BranchingNeurons
 
 
 def power_law_plot(data, data_type='size'):
@@ -147,7 +149,7 @@ def loglog_plotting(type: str, data: pd.DataFrame, grouped_branching: pd.DataFra
 def plot_activity_per_time_step(n_steps: int, ax: Optional[plt.plot]=None, **kwargs) -> None:
     aspect_ratio = kwargs['N']/ n_steps
     if ax is None:
-        fig, ax = plt.subplots(3, figsize=(10, 30))
+        fig, ax = plt.subplots(3, figsize=(30, 10))
     
     for i,branching_ratio in enumerate([0.8, 1.2, 2.0]):
         kwargs["branching_ratio"] = branching_ratio 
