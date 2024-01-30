@@ -12,8 +12,8 @@ def simulation_wrapper(args):
     steps = 10000
     params = {
         "grid_size": grid_size,
-        "height": 3,
-        "refractory_period": 3,
+        "height": 1,
+        "refractory_period": 8,
         "probability_of_spontaneous_activity": 0.03,
         "max_distance": 3,
         "visualize": False,
@@ -22,7 +22,7 @@ def simulation_wrapper(args):
 
     params[param_name] = param_value
 
-    file_name = f"data/new_varying_{param_name}_{param_value}.csv"
+    file_name = f"data/new_varying_{param_name}_{param_value}_h_2.csv"
     run_simulation(params, steps, file_name)
 
 
@@ -36,4 +36,4 @@ def run_multiprocess_simulation(param_name, param_values):
     pool.join()
 
 if __name__ == "__main__":
-    run_multiprocess_simulation("height", range(1, 10))
+    run_multiprocess_simulation("refractory_period", range(1, 10))
