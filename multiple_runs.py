@@ -1,25 +1,39 @@
+import multiprocessing
 from sandpile import BTW
-from config import kwargs_oscillatory
 
-# Varying parameter
-# height_values = range(1, 10)
+def run_simulation(params, steps, file_name):
+    btw = BTW(**params)
+    btw.run(steps)
+    btw.write_data(file_name)
 
-# for height in height_values:
-#     current_kwargs = kwargs_oscillatory.copy()
-#     current_kwargs['height'] = height
+def simulation_wrapper(args):
+    param_name, param_value = args
+    grid_size = [50, 50]
+    steps = 10000
+    params = {
+        "grid_size": grid_size,
+        "height": 3,
+        "refractory_period": 3,
+        "probability_of_spontaneous_activity": 0.03,
+        "max_distance": 3,
+        "visualize": False,
+        "random_connection": False
+    }
 
-#     btw = BTW(grid_size=[50, 50], **current_kwargs)
+    params[param_name] = param_value
 
-#     btw.run(10000)
-#     btw.write_data(f"data/varying_height_{height}.csv")
+    file_name = f"data/new_varying_{param_name}_{param_value}.csv"
+    run_simulation(params, steps, file_name)
 
-refractory_period_values = range(1, 10)
 
-for refractory_period in refractory_period_values:
-    current_kwargs = kwargs_oscillatory.copy()
-    current_kwargs['refractory_period'] = refractory_period
+def run_multiprocess_simulation(param_name, param_values):
+    args_list = [(param_name, value) for value in param_values]
 
-    btw = BTW(grid_size=[50, 50], **current_kwargs)
+    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+    pool.map(simulation_wrapper, args_list)
 
-    btw.run(10000)
-    btw.write_data(f"data/varying_refractory_{refractory_period}.csv")
+    pool.close()
+    pool.join()
+
+if __name__ == "__main__":
+    run_multiprocess_simulation("height", range(1, 10))
