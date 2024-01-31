@@ -380,6 +380,6 @@ def susceptibility(spike_history: list, neuron_num: int) -> list:
     Calculate the susceptibility of a single simulation.
     """
     spike_history = np.array(spike_history)
-    spike_history /= neuron_num
-    return np.var(spike_history)
+    spike_density = spike_history / neuron_num
+    return np.var(spike_density)
 
