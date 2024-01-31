@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import csv
+from feedforward import Feedforward
 
 def test_init_grid():
     '''
@@ -241,3 +242,10 @@ def test_density():
     assert all([x == y for x,y in zip([1,2,3], values)]), "Incorrect values"
     for true, test in zip(true_density, density):
         assert np.isclose(true, test), "Incorrect density"
+
+
+def test_feed_forward():
+    network = Feedforward(20,3,2)
+    assert len(network.layers) == 3, "Incorrect number of layers"
+    assert all(layer.weight.shape[0] == 20 for layer in network.layers), f"Incorrect weight shape {network.layers[0].weight.shape}"
+    assert all(np.isclose(sum(layer.weight), layer.branching_ratio) for layer in network.layers), f"Incorrect branching ratio {sum(network.layers[0].weight)}"

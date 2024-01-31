@@ -103,7 +103,7 @@ class BranchingNeurons():
             Plots the duration of each avalanche during the simulation.
     """
 
-    def __init__(self, N:int, max_neighbors: int, branching_ratio: float, visual: bool=False) -> None:
+    def __init__(self, N:int, max_neighbors: int, branching_ratio: float, cooldown: int = 0,  visual: bool=False) -> None:
 
         self.neurons = [Neuron(tuple(np.random.random(2)), 
                                branching_ratio) for i in range(N)]
@@ -111,6 +111,7 @@ class BranchingNeurons():
         assert max_neighbors < N, "Max neighbors must be less than the number of neurons."
         self.max_neighbors = max_neighbors
         self.branching_ratio = branching_ratio
+        self.cooldown = cooldown
 
         self.evalanche_size = []
         self.evalanche_duration = []
@@ -252,7 +253,7 @@ class BranchingNeurons():
 
                 self.propage_activations(neuron)
                 neuron.active = 0
-                neuron.cooldown = 5
+                neuron.cooldown = self.cooldown
 
             for neuron in self.neurons:
                 if neuron.cooldown:
@@ -282,13 +283,12 @@ class BranchingNeurons():
 if __name__ == "__main__":
 
     kwargs = {
-        'N': 1000,
+        'N': 100,
         'max_neighbors': 8,
         'branching_ratio': 3,
-        'visual': False,
+        'visual': True,
     }
     sim = BranchingNeurons(**kwargs)
     sim.run(10000)
-    sim.activity_plot()
     print(f'Max avalance size: {max(sim.evalanche_size)}\nMax avalance duration: {max(sim.evalanche_duration)} \nMean density: {np.mean(sim.density)}')
     print(f'Mean branching ratio: {np.mean(sim.branching)} ±{np.std(sim.branching)}, with {len(sim.branching)} samples.')
