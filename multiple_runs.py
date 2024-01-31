@@ -12,7 +12,7 @@ def simulation_wrapper(args):
     steps = 10000
     params = {
         "grid_size": grid_size,
-        "height": 1,
+        "height": 8,
         "refractory_period": 8,
         "probability_of_spontaneous_activity": 0.03,
         "max_distance": 3,
@@ -22,7 +22,7 @@ def simulation_wrapper(args):
 
     params[param_name] = param_value
 
-    file_name = f"data/new_varying_{param_name}_{param_value}_h_2.csv"
+    file_name = f"data/new_varying_{param_name}_{param_value}_h_8.csv"
     run_simulation(params, steps, file_name)
 
 
