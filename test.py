@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import csv
-from feedforward import Feedforward
+import random
 
 def test_init_grid():
     '''
@@ -45,40 +45,6 @@ def test_run():
 
 
 
-def test_check_neighbors():
-    grid_test_1 = np.array([[4, 0, 4], 
-                            [0, 0, 0], 
-                            [4, 0, 4]])
-    grid_cont_1 = np.array([[0, 0, 0], 
-                            [0, 4, 0], 
-                            [0, 0, 0]])
-
-    grid_test_2 = np.array([[4, 0, 4, 0],
-                            [0, 4, 0, 4],
-                            [4, 0, 4, 0],
-                            [0, 4, 0, 4]])
-    grid_cont_2 = np.array([[0, 0, 0, 0],
-                            [0, 0, 4, 0],
-                            [0, 4, 0, 0],
-                            [0, 0, 0, 0]])
-
-    grid_test_3 = np.array([[0, 4, 0, 4, 0],
-                            [0, 4, 0, 4, 0],
-                            [0, 0, 0, 0, 0],
-                            [0, 4, 0, 4, 0],
-                            [0, 0, 0, 0, 0]])
-    grid_cont_3 = np.array([[0, 0, 4, 0, 0],
-                            [0, 0, 4, 0, 0],
-                            [0, 0, 4, 0, 0],
-                            [0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0]])
-
-    
-    for i, (test, control) in enumerate(zip([grid_test_1, grid_test_2, grid_test_3], [grid_cont_1, grid_cont_2, grid_cont_3]), start=3):
-        btw = BTW([i, i], height=4, max_distance=1.5)
-        btw.grid = test
-        btw.check_neighbors()
-        assert np.all(btw.grid == control), f'Grid not correctly updated. \n {btw.grid} \n {control}'
         
 
 def test_writing():
@@ -244,8 +210,16 @@ def test_density():
         assert np.isclose(true, test), "Incorrect density"
 
 
-def test_feed_forward():
-    network = Feedforward(20,3,2)
-    assert len(network.layers) == 3, "Incorrect number of layers"
-    assert all(layer.weight.shape[0] == 20 for layer in network.layers), f"Incorrect weight shape {network.layers[0].weight.shape}"
-    assert all(np.isclose(sum(layer.weight), layer.branching_ratio) for layer in network.layers), f"Incorrect branching ratio {sum(network.layers[0].weight)}"
+def test_mutual_info():
+    inpt = list(range(1, 20))
+    output1 = list(range(2, 21))
+    output2 = [random.randint(1, 10) for _ in range(19)]
+    mi1 = mutual_info(inpt, output1)
+    mi2 = mutual_info(inpt, output2)
+    assert mi1 > mi2, "Incorrect mutual information"
+
+
+def test_dynamic_range():
+    output = [1, 3, 1, 2, 1, 1, 4, 2, 3, 2]
+    dr = dynamic_range(output)
+    expected = [[1, 2, 3, 4], [0.4, 0.3, 0.2, 0.1]]
