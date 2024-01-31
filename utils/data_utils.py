@@ -320,3 +320,21 @@ def write_data(data: List, file_name: str) -> None:
         for run in data:
             writer = csv.DictWriter(f, fieldnames=header)
             writer.writerow(run)
+            
+def raster_to_basic(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Convert the raster data to basic data:spikes_total, spikes_neighbours, spikes_input.
+    """
+    params_columns = ['grid_size', 'height', 'max_distance', 'refractory_period', 
+                      'probability_of_spontaneous_activity', 'random_connection']
+    df = df.drop(columns=params_columns, errors='ignore')
+    spikes_total = df.apply(lambda row: (row == 2).sum() + (row == 1).sum(), axis=1)
+    spikes_neighbours = df.apply(lambda row: (row == 2).sum(), axis=1)
+    spikes_input = df.apply(lambda row: (row == 1).sum(), axis=1)
+
+    df_basic = pd.DataFrame({
+        'spikes_total': spikes_total,
+        'spikes_neighbours': spikes_neighbours,
+        'spikes_input': spikes_input
+    })
+    return df_basic
