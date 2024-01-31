@@ -349,16 +349,16 @@ def raster_to_basic(df: pd.DataFrame) -> pd.DataFrame:
     return df_basic
 
 
-def mutual_info(input_num: int, output_num: int) -> float:
+def mutual_info(input_nums: list, output_nums: list) -> float:
     """
     Calculate the mutual information between the input and output.
     """
-    X = np.array(input_num).reshape(-1, 1)
-    Y = np.array(output_num)
+    X = np.array(input_nums).reshape(-1, 1)
+    Y = np.array(output_nums)
     return mutual_info_regression(X, Y)[0]
 
 
-def dynamic_range(output_num: int) -> list:
+def dynamic_range(output_nums: list) -> list:
     """
     Calculate the dynamic range of the output.
     """
@@ -372,7 +372,7 @@ def dynamic_range(output_num: int) -> list:
     combined = list(zip(spike_num, probability))
     combined.sort(key=lambda x: x[0])
     spike_num_sorted, probability_sorted = zip(*combined)
-    return (spike_num_sorted, probability_sorted)
+    return [spike_num_sorted, probability_sorted]
 
 
 def susceptibility(spike_history: list, neuron_num: int) -> list:
