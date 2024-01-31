@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import csv
+import random
 
 def test_init_grid():
     '''
@@ -241,3 +242,18 @@ def test_density():
     assert all([x == y for x,y in zip([1,2,3], values)]), "Incorrect values"
     for true, test in zip(true_density, density):
         assert np.isclose(true, test), "Incorrect density"
+
+
+def test_mutual_info():
+    input = list(range(1, 20))
+    output1 = list(range(2, 21))
+    output2 = [random.randint(1, 10) for _ in range(19)]
+    mi1 = mutual_info(input, output1)
+    mi2 = mutual_info(input, output2)
+    assert mi1 > mi2, "Incorrect mutual information"
+
+
+def test_dynamic_range():
+    output = [1, 3, 1, 2, 1, 1, 4, 2, 3, 2]
+    dr = dynamic_range(output)
+    expected = [[1, 2, 3, 4], [0.4, 0.3, 0.2, 0.1]]
