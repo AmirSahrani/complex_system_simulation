@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from .data_utils import *
 import powerlaw
+from typing import Optional
+from branching import BranchingNeurons
 
 
 def power_law_plot(data, data_type='size'):
@@ -113,6 +115,50 @@ def powerlaw_avalanche_plots(paths: list, method: list, thresh_m: float) -> None
     
     plt.tight_layout()
     plt.show()
+
+
+def loglog_plotting(type: str, data: pd.DataFrame, grouped_branching: pd.DataFrame):
+    fig, ax =plt.subplots(3,3, figsize=(15,15))
+    ax = ax.ravel()
+    for i in range(9):
+        offset = 4
+        all_critical_points =  data.loc[data['branching_ratio'] == grouped_branching.index[offset+i]]
+        all_data = np.concatenate(all_critical_points[type].values)
+        all_data = all_data[all_data > 0]
+
+        fit = powerlaw.Fit(all_data, verbose=False, xmin=1, discrete=True)
+        fitted_line =  np.linspace(0, max(all_data), 100) ** -fit.alpha 
+
+
+
+        powerlaw.plot_pdf(all_data, ax=ax[i], color='red', label='Empirical data' , linestyle='None', marker='o', markersize=3, alpha=0.5)
+        ax[i].plot(fitted_line, color='black', linestyle='--', label='Power law fit')
+
+        ax[i].set_title(f'Branching ratio: {grouped_branching.index[offset+i]:.2f}')
+        ax[i].text(0.6, 0.9, f'Alpha: {fit.alpha:.2f}\n ', transform=ax[i].transAxes)
+        ax[i].set_xlabel(type.split('_')[0].capitalize() + ' ' + type.split('_')[1])
+        ax[i].set_ylabel('Frequency')
+        ax[i].set_xscale('log')
+        ax[i].set_yscale('log')
+        ax[i].set_xlim([1, 1e3])
+        ax[i].set_ylim([1e-5, 1e0])
+
+    plt.show()
+
+
+def plot_activity_per_time_step(n_steps: int, ax: Optional[plt.plot]=None, **kwargs) -> None:
+    aspect_ratio = kwargs['N']/ n_steps
+    if ax is None:
+        fig, ax = plt.subplots(3, figsize=(30, 10))
+    
+    for i,branching_ratio in enumerate([0.8, 1.2, 2.0]):
+        kwargs["branching_ratio"] = branching_ratio 
+        sim = BranchingNeurons(**kwargs)
+        sim.run(n_steps)
+        data = np.array(sim.activity).T
+        ax[i].imshow(data, cmap='binary', interpolation='nearest')
+        ax[i].set_title(f'Branching ratio: {branching_ratio}')
+
 
 
         

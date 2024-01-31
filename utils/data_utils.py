@@ -3,6 +3,7 @@ import csv as csv
 import pandas as pd
 from sandpile import BTW
 import os
+from typing import List
 
 
 def load_data_txt(path: str) -> list:
@@ -298,3 +299,24 @@ def avalanche_to_statistics(avalanches: list) -> pd.DataFrame:
         duration = len(avalanche)
         statistics.append([size, duration])
     return pd.DataFrame(statistics, columns=['size', 'duration'])
+
+def str_to_list(s):
+    if not isinstance(s, str):
+        return s
+    if s == '[]':
+        return []
+    return [float(x) for x in s.strip('[]').split(',')]
+
+def write_data(data: List, file_name: str) -> None:
+    """Write data to a CSV file."""
+    if os.path.exists(file_name):
+        mode = "a"
+    else:
+        mode = "w"
+    with open(file_name, mode) as f:
+        header = list(data[0].keys())
+        if mode == "w":
+            f.write(",".join(header) + "\n")
+        for run in data:
+            writer = csv.DictWriter(f, fieldnames=header)
+            writer.writerow(run)
