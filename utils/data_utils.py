@@ -63,6 +63,7 @@ def ref_avg_spike_density(data:pd.DataFrame, size:int, refractory_period:int) ->
     avg_density = np.mean(densities) if densities else 0
     return avg_density
 
+
 def avg_spike_density(data:pd.DataFrame, size:int) -> float:
     """Calculate the average spike density."""
     # avg_spake_density is defined as avg[spikes_total / the number of neurons] in each time step
@@ -72,6 +73,7 @@ def avg_spike_density(data:pd.DataFrame, size:int) -> float:
     print(avg_density)
     return avg_density
     
+
 def branching_prameter(df: pd.DataFrame) -> float:
     """
     Calculates the branching parameter sigma.
@@ -307,8 +309,11 @@ def str_to_list(s):
         return []
     return [float(x) for x in s.strip('[]').split(',')]
 
+
 def write_data(data: List, file_name: str) -> None:
-    """Write data to a CSV file."""
+    """
+    Write data to a CSV file.
+    """
     if os.path.exists(file_name):
         mode = "a"
     else:
@@ -320,3 +325,5 @@ def write_data(data: List, file_name: str) -> None:
         for run in data:
             writer = csv.DictWriter(f, fieldnames=header)
             writer.writerow(run)
+
+
