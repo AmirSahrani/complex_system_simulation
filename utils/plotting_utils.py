@@ -32,39 +32,40 @@ def phase_transition_plot(data: pd.DataFrame):
 
 def spike_density_plot(paths: list, size: int) -> None:
     """Plot the spike density."""
-    plt.figure(figsize=(10, 8)) 
-    plt.title("Average spike density vs. branching ratio", fontsize=16)
-    plt.xlabel("Branching Ratio", fontsize=14)
-    plt.ylabel("Average Spike Density", fontsize=14)
-    plt.xlim(0, 5)
-    plt.xticks(np.arange(0, 5.2, 0.2))
+    plt.figure(figsize=(8, 6)) 
+    plt.title("Not Considering Refractory Peirod", fontsize=20)
+    plt.xlabel("σ(Branching Ratio)", fontsize=18)
+    plt.ylabel("Average Spike Density", fontsize=18)
+    plt.xlim(0, 4)
+    plt.xticks(np.arange(0, 4.2, 0.2))
     plt.grid(True)
     for path in paths:  
         df = load_data_csv(path)
         # Plot the average spike density vs. the branching parameter
         density = avg_spike_density(df, size)
-        print(density)
         m = branching_prameter(df)
-        plt.scatter(m, density)
+        plt.scatter(m, density, color='black', s=10)
+    plt.axvline(x=1, color='orange', linestyle='-', linewidth=2)
     plt.show()
 
 
 def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> None:
     """Plot the spike density."""
-    plt.figure(figsize=(10, 8)) 
-    plt.title("Average spike density vs. Branching Ratio", fontsize=16)
-    plt.xlabel("Branching Ratio", fontsize=14)
-    plt.ylabel("Average Spike Density", fontsize=14)
-    plt.xlim(0, 5)
-    plt.xticks(np.arange(0, 5.2, 0.2))
+    plt.figure(figsize=(8, 6)) 
+    plt.title("Considering Refractory Period", fontsize=20)
+    plt.xlabel("σ(Branching Ratio)", fontsize=18)
+    plt.ylabel("Average Spike Density", fontsize=18)
+    plt.xlim(0, 4)
+    plt.xticks(np.arange(0, 4.2, 0.2))
     plt.grid(True)
     for path, refractory_period in zip(paths, refractory_periods):  
         df = load_data_csv(path)
         # Plot the average spike density vs. the branching parameter
         density = ref_avg_spike_density(df, size,refractory_period)
-        print(density)
+        #print(density)
         m = branching_prameter(df)
-        plt.scatter(m, density)
+        plt.scatter(m, density, color='black', s=10)
+    plt.axvline(x=1, color='orange', linestyle='-', linewidth=2)
     plt.show()
 
 
@@ -120,7 +121,7 @@ def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> 
 
 def grid_activity_timestep(paths: list, size: int):
     """Plot spike density vs. timestep. for ordered, complex(critical), chaotic stages."""
-    fig, axes = plt.subplots(len(paths), 1, sharex=True, figsize=(10, 8))
+    fig, axes = plt.subplots(len(paths), 1, sharex=True, figsize=(8, 6))
     
     for i, path in enumerate(paths):
         df = pd.read_csv(path)
@@ -134,10 +135,10 @@ def grid_activity_timestep(paths: list, size: int):
         elif i == 2:
             axes[i].set_title('Disordered')
         
-        axes[i].set_ylabel('Population activity')
+        axes[i].set_ylabel('Population Activity', fontsize=20)
         axes[i].set_ylim(0, 0.3)
     
-    plt.xlabel('Time steps')
+    plt.xlabel('Time Steps', fontsize=20)
     plt.xlim(0, 800)
     plt.tight_layout()
     plt.show()
@@ -187,7 +188,7 @@ def plot_activity_per_time_step(n_steps: int, ax: Optional[plt.plot]=None, **kwa
 def spike_activity_plot(paths: list, size: int):
     """Plot the raster spike activity."""
     num_plots = len(paths)
-    fig, axs = plt.subplots(num_plots, 1, sharex=True, figsize=(10, num_plots * 5))
+    fig, axs = plt.subplots(num_plots, 1, sharex=True, figsize=(7, num_plots * 4))
     
     if num_plots == 1:
         axs = [axs] 
@@ -206,12 +207,12 @@ def spike_activity_plot(paths: list, size: int):
         axs[idx].scatter(timesteps, neuron_numbers, color='black', s=0.1)
         
         # Set labels and limits for better clarity
-        axs[idx].set_ylabel(f"Neuron number", fontsize = 14)
+        axs[idx].set_ylabel(f"Neuron Number", fontsize = 16)
         axs[idx].set_ylim(-0.5, 400.5)  
         axs[idx].set_xlim(0, 500)
         
     # Set common labels
-    plt.xlabel("Time steps", fontsize = 14)
+    plt.xlabel("Time Steps", fontsize = 16)
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # Adjust the layout to make room for the common title
     
     # Show the plot
