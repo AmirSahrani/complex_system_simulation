@@ -69,7 +69,6 @@ def avg_spike_density(data:pd.DataFrame, size:int) -> float:
     # Only count rows where spikes_neighbours is not zero
     filtered_data = data[data['spikes_neighbours'] != 0]
     avg_density = np.mean(filtered_data['spikes_total']) / (size ** 2)
-    print(avg_density)
     return avg_density
     
 def branching_prameter(df: pd.DataFrame) -> float:
