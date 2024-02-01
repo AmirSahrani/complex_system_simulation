@@ -6,7 +6,6 @@ from typing import Optional
 from branching import BranchingNeurons
 
 
-
 def power_law_plot(data, data_type='size'):
     """Plot a distribution on log-log axes."""
     plt.hist(data, bins=len(data), log=True)
@@ -49,6 +48,7 @@ def spike_density_plot(paths: list, size: int) -> None:
     plt.axvline(x=1, color='orange', linestyle='-', linewidth=2)
     plt.show()
 
+
 def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> None:
     """Plot the spike density."""
     plt.figure(figsize=(8, 6)) 
@@ -67,7 +67,8 @@ def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> 
         plt.scatter(m, density, color='black', s=10)
     plt.axvline(x=1, color='orange', linestyle='-', linewidth=2)
     plt.show()
-    
+
+
 # def powerlaw_avalanche_plots(paths: list, method: list, thresh_m: float) -> None:
 #     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
 
@@ -99,8 +100,7 @@ def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> 
 #                 print(f"{path} has no enough data")
 #         except Exception as e:
 #             print(f"Error processing file {path}: {e}")
-
-    
+  
 #     ax1.set_xlabel("Size (s)", fontsize=14)
 #     ax1.set_ylabel("PDF", fontsize=14)
 #     ax1.set_title("Avalanche Size Distribution", fontsize=16)
@@ -117,6 +117,8 @@ def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> 
     
 #     plt.tight_layout()
 #     plt.show()
+
+
 def grid_activity_timestep(paths: list, size: int):
     """Plot spike density vs. timestep. for ordered, complex(critical), chaotic stages."""
     fig, axes = plt.subplots(len(paths), 1, sharex=True, figsize=(8, 6))
@@ -142,7 +144,6 @@ def grid_activity_timestep(paths: list, size: int):
     plt.show()
 
 
-
 def loglog_plotting(type: str, data: pd.DataFrame, grouped_branching: pd.DataFrame):
     fig, ax =plt.subplots(3,3, figsize=(15,15))
     ax = ax.ravel()
@@ -154,8 +155,6 @@ def loglog_plotting(type: str, data: pd.DataFrame, grouped_branching: pd.DataFra
 
         fit = powerlaw.Fit(all_data, verbose=False, xmin=1, discrete=True)
         fitted_line =  np.linspace(0, max(all_data), 100) ** -fit.alpha 
-
-
 
         powerlaw.plot_pdf(all_data, ax=ax[i], color='red', label='Empirical data' , linestyle='None', marker='o', markersize=3, alpha=0.5)
         ax[i].plot(fitted_line, color='black', linestyle='--', label='Power law fit')
@@ -184,7 +183,8 @@ def plot_activity_per_time_step(n_steps: int, ax: Optional[plt.plot]=None, **kwa
         data = np.array(sim.activity).T
         ax[i].imshow(data, cmap='binary', interpolation='nearest')
         ax[i].set_title(f'Branching ratio: {branching_ratio}')
-        
+
+
 def spike_activity_plot(paths: list, size: int):
     """Plot the raster spike activity."""
     num_plots = len(paths)
@@ -259,7 +259,6 @@ def spike_activity_plot(paths: list, size: int):
 #                 print(f"{path} has no enough data")
 #         except Exception as e:
 #             print(f"Error processing file {path}: {e}")
-
     
 #     ax1.set_xlabel("Size (s)", fontsize=14)
 #     ax1.set_ylabel("PDF", fontsize=14)
@@ -277,6 +276,7 @@ def spike_activity_plot(paths: list, size: int):
     
 #     plt.tight_layout()
 #     plt.show()  
+
 
 def raster_to_basic(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -297,3 +297,37 @@ def raster_to_basic(df: pd.DataFrame) -> pd.DataFrame:
     return df_basic
 
         
+def mutual_info_plot(mutual_info: list, branching_ratios: list) -> None:
+    """
+    Plot mutual information vs. branching ratio.
+    """
+    plt.figure(figsize=(12, 8))
+    plt.plot(branching_ratios, mutual_info)
+    plt.xlabel("Branching Ratio", fontsize=14)
+    plt.ylabel("Mutual Information", fontsize=14)
+    plt.title("Mutual Information vs. Branching Ratio", fontsize=16)
+    plt.show()
+
+
+def dynamic_range_plot(spike_num: list, probability: list, branching_ratio: float) -> None:
+    """
+    Plot the dynamic range of a certain branching ratio.
+    """
+    plt.figure(figsize=(12, 8))
+    plt.plot(spike_num, probability)
+    plt.xlabel("Response, number of neurons", fontsize=14)
+    plt.ylabel("Probability (Response)", fontsize=14)
+    plt.title(f"Branching Ratio = {branching_ratio}", fontsize=16)
+    plt.show()
+
+
+def susceptibility_plot(susceptibilities: list, branching_ratios: list) -> None:
+    """
+    Plot susceptibility vs. branching ratio.
+    """
+    plt.figure(figsize=(12, 8))
+    plt.plot(branching_ratios, susceptibilities)
+    plt.xlabel("Branching Ratio", fontsize=14)
+    plt.ylabel("Susceptibility", fontsize=14)
+    plt.title("Susceptibility vs. Branching Ratio", fontsize=16)
+    plt.show()
