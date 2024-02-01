@@ -4,6 +4,8 @@ import pandas as pd
 from sandpile import BTW
 import os
 from typing import List
+from sklearn.feature_selection import mutual_info_regression
+from collections import Counter
 
 
 def load_data_txt(path: str) -> list:
@@ -63,6 +65,7 @@ def ref_avg_spike_density(data:pd.DataFrame, size:int, refractory_period:int) ->
     avg_density = np.mean(densities) if densities else 0
     return avg_density
 
+
 def avg_spike_density(data:pd.DataFrame, size:int) -> float:
     """Calculate the average spike density."""
     # avg_spake_density is defined as avg[spikes_total / the number of neurons] in each time step
@@ -72,13 +75,14 @@ def avg_spike_density(data:pd.DataFrame, size:int) -> float:
     print(avg_density)
     return avg_density
     
-def branching_prameter(df: pd.DataFrame) -> float:
+
+def branching_prameter(spikes_df: pd.DataFrame) -> float:
     """
     Calculates the branching parameter sigma.
     Sigma is defined as the ratio of next timestep's spikes_neighbours to this timestep's spikes_total,
     excluding cases where spikes_total is or NaN. The result is divided by the count of non-null spikes_total.
     """
-    df_copy = df.copy()
+    df_copy = spikes_df.copy()
 
     # Check if the last number of spikes_neighbours is nonzero
     # If it's nonzero, add a new row with 0 spikes_neighbours after it
@@ -300,6 +304,7 @@ def avalanche_to_statistics(avalanches: list) -> pd.DataFrame:
         statistics.append([size, duration])
     return pd.DataFrame(statistics, columns=['size', 'duration'])
 
+
 def str_to_list(s):
     if not isinstance(s, str):
         return s
@@ -307,8 +312,11 @@ def str_to_list(s):
         return []
     return [float(x) for x in s.strip('[]').split(',')]
 
+
 def write_data(data: List, file_name: str) -> None:
-    """Write data to a CSV file."""
+    """
+    Write data to a CSV file.
+    """
     if os.path.exists(file_name):
         mode = "a"
     else:
@@ -320,3 +328,58 @@ def write_data(data: List, file_name: str) -> None:
         for run in data:
             writer = csv.DictWriter(f, fieldnames=header)
             writer.writerow(run)
+
+            
+def raster_to_basic(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Convert the raster data to basic data:spikes_total, spikes_neighbours, spikes_input.
+    """
+    params_columns = ['grid_size', 'height', 'max_distance', 'refractory_period', 
+                      'probability_of_spontaneous_activity', 'random_connection']
+    df = df.drop(columns=params_columns, errors='ignore')
+    spikes_total = df.apply(lambda row: (row == 2).sum() + (row == 1).sum(), axis=1)
+    spikes_neighbours = df.apply(lambda row: (row == 2).sum(), axis=1)
+    spikes_input = df.apply(lambda row: (row == 1).sum(), axis=1)
+
+    df_basic = pd.DataFrame({
+        'spikes_total': spikes_total,
+        'spikes_neighbours': spikes_neighbours,
+        'spikes_input': spikes_input
+    })
+    return df_basic
+
+
+def mutual_info(input_nums: list, output_nums: list) -> float:
+    """
+    Calculate the mutual information between the input and output.
+    """
+    X = np.array(input_nums).reshape(-1, 1)
+    Y = np.array(output_nums)
+    return mutual_info_regression(X, Y)[0]
+
+
+def dynamic_range(output_nums: list) -> list:
+    """
+    Calculate the dynamic range of the output.
+    """
+    spike_num = []
+    probability = []
+    simulation_num = len(output_num)
+    count_dic = Counter(output_num)
+    for key, value in count_dic.items():
+        spike_num.append(key)
+        probability.append(value / simulation_num)
+    combined = list(zip(spike_num, probability))
+    combined.sort(key=lambda x: x[0])
+    spike_num_sorted, probability_sorted = zip(*combined)
+    return [spike_num_sorted, probability_sorted]
+
+
+def susceptibility(spike_history: list, neuron_num: int) -> list:
+    """
+    Calculate the susceptibility of a single simulation.
+    """
+    spike_history = np.array(spike_history)
+    spike_density = spike_history / neuron_num
+    return np.var(spike_density)
+

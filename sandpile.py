@@ -187,9 +187,9 @@ class BTW():
         return raster_df
 
 
-    def write_data(self, path: str) -> None:
+    def collect_spikes(self) -> pd.DataFrame:
         """
-        Writes single set of self.spikes_neighbors, self.spikes_total and spikes_input to one csv file.
+        Collect single set of self.spikes_neighbors, self.spikes_total and spikes_input to one dataframe.
         """
         args = {"grid_size": self.grid.shape[0] * self.grid.shape[1], 
                 "height": self.max_height, 
@@ -203,16 +203,68 @@ class BTW():
         results_df = pd.DataFrame({"spikes_total": spikes_total, 
                                 "spikes_neighbours": spikes_neighbours, 
                                 "spikes_input": spikes_total - spikes_neighbours})
-        
+
         combined_df = pd.concat([args_df, results_df], axis=1)
+
+        return combined_df
+
+
+    def write_data(self, path: str) -> None:
+        """
+        Writes single set of self.spikes_neighbors, self.spikes_total and spikes_input to one csv file.
+        """
+        combined_df = self.collect_spikes()
         combined_df.to_csv(path, index=True)
         print("Data written to: ", path)
 
 
 
+class CA_continuous_threshold(BTW):
+    """
+    Continuous threshold model.
+    """
+    def __init__(self, grid_size: List, height: int=2, visualize: bool=False, max_distance: float=3, refractory_period: int=3, probability_of_spontaneous_activity: float=0.02, random_connection: bool=False, threshold: float=2.0) -> None:
+        super().__init__(grid_size, height, visualize, max_distance, refractory_period, probability_of_spontaneous_activity, random_connection)
+        self.threshold = threshold
+
+
+    def check_neighbors(self) -> None:
+        """
+        Check if any points on the grid are over the critical height. If so, topple them.
+        """
+        toppled = np.where(self.grid >= self.max_height)
+        p = 1 - (self.threshold % 1)    # e.g., if threshold = 2.7, then p = 0.3
+
+        if self.random_connection:
+            for location in zip(*toppled):
+                self.grid[location] = 0
+                self.refractory_matrix[location] = self.refractory_period + 1
+                index = location[0] * self.grid.shape[0] + location[1]
+                for neighbor in self.direction[index]:
+                    x, y = neighbor // self.grid.shape[0], neighbor % self.grid.shape[0]
+                    if x >= 0 and x < self.grid.shape[0] and y >= 0 and y < self.grid.shape[1] and self.refractory_matrix[x, y] == 0:
+                        self.grid[x, y] += 1
+        else:
+            for location in zip(*toppled):
+                self.grid[location] = 0
+                self.refractory_matrix[location] = self.refractory_period + 1
+                for d in self.direction:
+                    x, y = location[0] + d[0], location[1] + d[1]
+                    if x >= 0 and x < self.grid.shape[0] and y >= 0 and y < self.grid.shape[1] and self.refractory_matrix[x, y] == 0:
+                        self.grid[x, y] += 1
+        must_spike = self.grid >= self.threshold
+        probs = np.random.random(self.grid.shape)
+        might_spike = np.logical_and(self.grid+1-p == self.threshold, probs < p)
+        self.grid = np.logical_or(must_spike, might_spike)
+        self.grid = self.grid.astype(int) * self.max_height
+
+
+
 if __name__ == "__main__":
-    btw = BTW(grid_size=[50, 50], **kwargs_random)
-    # btw.init_grid("random", 4)
-    btw.run(10000)
+    #btw = BTW(grid_size=[50, 50], **kwargs_oscillatory)
+    # btw = BTW(grid_size=[50, 50], refractory_period=3,height=2,probability_of_spontaneous_activity=0.02,max_distance=3,random_connection=False, visualize=True)
+    # btw.run(10000)
     # btw.write_data("data/test")
     # btw.collect_raster_data(1000, "data/test_raster")
+    CA1 = CA_continuous_threshold(grid_size=[50, 50], refractory_period=3, height=5, probability_of_spontaneous_activity=0.03, max_distance=3, random_connection=False, visualize=True, threshold=5.1)
+    CA1.run(10000)

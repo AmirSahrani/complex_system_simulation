@@ -13,10 +13,10 @@ def simulate(simulation: Callable, n_runs: int, duration: int, **kwargs):
             "evalanche_size": sim.evalanche_size,
             "evalanche_duration": sim.evalanche_duration,
             "density": np.mean(sim.density),
+            "cooldown": sim.cooldown,
             'branching_ratio': kwargs['branching_ratio'],
             'emperical_branching_ratio': np.mean(sim.branching)
         })
-        print(results[i]['density'])
         sim.reset()
     return results
         
