@@ -76,13 +76,13 @@ def avg_spike_density(data:pd.DataFrame, size:int) -> float:
     return avg_density
     
 
-def branching_prameter(df: pd.DataFrame) -> float:
+def branching_prameter(spikes_df: pd.DataFrame) -> float:
     """
     Calculates the branching parameter sigma.
     Sigma is defined as the ratio of next timestep's spikes_neighbours to this timestep's spikes_total,
     excluding cases where spikes_total is or NaN. The result is divided by the count of non-null spikes_total.
     """
-    df_copy = df.copy()
+    df_copy = spikes_df.copy()
 
     # Check if the last number of spikes_neighbours is nonzero
     # If it's nonzero, add a new row with 0 spikes_neighbours after it
