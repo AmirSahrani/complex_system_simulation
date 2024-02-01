@@ -261,10 +261,10 @@ class CA_continuous_threshold(BTW):
 
 
 if __name__ == "__main__":
-    #btw = BTW(grid_size=[50, 50], **kwargs_oscillatory)
+    btw = BTW(grid_size=[50, 50], height=3, visualize=True, max_distance=3, refractory_period=7, probability_of_spontaneous_activity=0.02, random_connection=False)
     # btw = BTW(grid_size=[50, 50], refractory_period=3,height=2,probability_of_spontaneous_activity=0.02,max_distance=3,random_connection=False, visualize=True)
-    # btw.run(10000)
+    btw.run(10000)
     # btw.write_data("data/test")
     # btw.collect_raster_data(1000, "data/test_raster")
-    CA1 = CA_continuous_threshold(grid_size=[50, 50], refractory_period=3, height=5, probability_of_spontaneous_activity=0.03, max_distance=3, random_connection=False, visualize=True, threshold=5.1)
-    CA1.run(10000)
+    #CA1 = CA_continuous_threshold(grid_size=[50, 50], refractory_period=3, height=5, probability_of_spontaneous_activity=0.03, max_distance=3, random_connection=False, visualize=True, threshold=5.1)
+    #CA1.run(10000)
