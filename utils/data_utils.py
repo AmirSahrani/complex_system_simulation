@@ -20,34 +20,8 @@ def load_data_csv(path: str) -> pd.DataFrame:
     """Load data from a CSV file."""
     return pd.read_csv(path, index_col=0)
 
-# def to_bin(data: pd.DataFrame, bin_size: int) -> pd.DataFrame:
-#     """Convert data(timestep,spikes_input, spikes_neighbours) to in bin units."""
-#     data['bin'] = (data['timestep'] - 1) // bin_size + 1 #!! to be determined if the logic works for float timesteps'
-#     df = data.groupby('bin').agg({'spikes_input': 'sum', 'spikes_neighbours': 'sum'}).reset_index()
-#     return df
-
-# def avg_spike_density_gird(data: pd.DataFrame, data_bin:pd.DataFrame, size: int, refractory_period: int, bin_size: int) -> float:
-#     """Calculate the average spike density."""
-#     # avg_spake_density is defined as avg[spikes_neighbours / （the number of neurons - the sum of spikes in last bin)] in each bin
-#     data['bin'] = (data['timestep'] - 1) // bin_size + 1
-#     data_bin['refractory_sum'] = 0
-#     for bin_number in data_bin['bin'].unique():
-#         bin_refractory_sum = 0
-#         timesteps_in_bin = data[data['bin'] == bin_number]['timestep']
-#         for timestep in timesteps_in_bin:
-#             bin_refractory_sum += data.loc[
-#                 (data['timestep'] < timestep) & 
-#                 (data['timestep'] >= timestep - refractory_period),
-#                 ['spikes_neighbours', 'spikes_input']
-#             ].sum().sum()
-#         data_bin.loc[data_bin['bin'] == bin_number, 'refractory_sum'] = bin_refractory_sum
-#     data_bin['density'] = data_bin['spikes_neighbours'] / (size**2 - data_bin['refractory_sum'])
-#     return data_bin['density'].mean()
-
-    # avg_spake_density is defined as avg[spikes_neighbours / the number of neurons] in each bin
-    #return np.mean(data_bin['spikes_neighbours'] / size**2 ])
 def ref_avg_spike_density(data:pd.DataFrame, size:int, refractory_period:int) -> float:
-    """Calculate the average spike density."""
+    """Calculate the average spike density considering refractory period."""
     # avg_spake_density is defined as avg[spikes_total / the number of neurons] in each time step
     # return np.mean(data['spikes_total']) / float(size)**2
     # avg_spake_density is defined as avg[spikes_total / （the number of neurons - the sum of spikes in last timestep)] in each timestep
@@ -67,7 +41,7 @@ def ref_avg_spike_density(data:pd.DataFrame, size:int, refractory_period:int) ->
 
 
 def avg_spike_density(data:pd.DataFrame, size:int) -> float:
-    """Calculate the average spike density."""
+    """Calculate the average spike density without considering refractory period."""
     # avg_spake_density is defined as avg[spikes_total / the number of neurons] in each time step
     # Only count rows where spikes_neighbours is not zero
     filtered_data = data[data['spikes_neighbours'] != 0]
@@ -108,6 +82,7 @@ def branching_prameter(spikes_df: pd.DataFrame) -> float:
 
 
 def avalanche_distributions(df: pd.DataFrame) -> (list, list):
+    """Return the size and duration of avalanches without distinguishing origins."""
     sizes = []
     durations = []
     avalanche_in_progress = False
