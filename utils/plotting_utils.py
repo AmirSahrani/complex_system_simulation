@@ -21,17 +21,9 @@ def power_law_plot(data, data_type='size'):
     plt.show()
 
 
-def phase_transition_plot(data: pd.DataFrame):
-    """Plot a phase transition."""
-    plt.plot(data["Control parameter"], data["Order parameter"])
-    plt.xlabel("CONROL PARAMETER") #!! Need to determine these
-    plt.ylabel("ORDER PARAMETER") #EITHER AVALANCHE SIZE OR DURATION
-    plt.title("Phase transition")
-    plt.show()
-
 
 def spike_density_plot(paths: list, size: int) -> None:
-    """Plot the spike density."""
+    """Plot the spike density vs. branching ratio."""
     plt.figure(figsize=(8, 6)) 
     plt.title("Not Considering Refractory Peirod", fontsize=20)
     plt.xlabel("σ(Branching Ratio)", fontsize=18)
@@ -50,7 +42,7 @@ def spike_density_plot(paths: list, size: int) -> None:
 
 
 def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> None:
-    """Plot the spike density."""
+    """Plot the spike density vs. branching ration while taking account of refractory period."""
     plt.figure(figsize=(8, 6)) 
     plt.title("Considering Refractory Period", fontsize=20)
     plt.xlabel("σ(Branching Ratio)", fontsize=18)
@@ -67,56 +59,6 @@ def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> 
         plt.scatter(m, density, color='black', s=10)
     plt.axvline(x=1, color='orange', linestyle='-', linewidth=2)
     plt.show()
-
-
-# def powerlaw_avalanche_plots(paths: list, method: list, thresh_m: float) -> None:
-#     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
-
-#     for path in paths:
-#         try:
-#             df = load_data_csv(path)
-#             sizes, durations = avalanche_distributions(df)
-#             sizes = [size for size in sizes if size > 0]
-#             durations = [duration for duration in durations if duration > 0]
-        
-#             if sizes and durations:
-#                 if method == 'fit':
-#                     if abs(branching_prameter(df) - 1) < thresh_m:
-#                         fit_sizes = powerlaw.Fit(sizes)
-#                         fit_sizes.power_law.plot_pdf(ax=ax1, color=np.random.rand(3,), linestyle='-')
-#                         fit_durations = powerlaw.Fit(durations)
-#                         fit_durations.power_law.plot_pdf(ax=ax2, color=np.random.rand(3,), linestyle='-')
-#                 elif method == 'plot':
-#                     if abs(branching_prameter(df) - 1) < thresh_m:
-#                         powerlaw.plot_pdf(sizes, ax=ax1, color=np.random.rand(3,), linestyle='--')
-#                         powerlaw.plot_pdf(durations, ax=ax2, color=np.random.rand(3,), linestyle='--')
-#                 elif method == 'scatter':
-#                     ax1.scatter(range(len(sizes)), sizes, color=np.random.rand(3,), linestyle='--')
-#                     ax2.scatter(range(len(durations)), durations, color=np.random.rand(3,), linestyle='--')
-#                 elif method == 'histogram':
-#                     ax1.hist(sizes, bins=len(sizes), log=True, color=np.random.rand(3,), linestyle='--')
-#                     ax2.hist(durations, bins=len(durations), log=True, color=np.random.rand(3,), linestyle='--')
-#             else:
-#                 print(f"{path} has no enough data")
-#         except Exception as e:
-#             print(f"Error processing file {path}: {e}")
-  
-#     ax1.set_xlabel("Size (s)", fontsize=14)
-#     ax1.set_ylabel("PDF", fontsize=14)
-#     ax1.set_title("Avalanche Size Distribution", fontsize=16)
-#     ax1.set_xscale('log')
-#     ax1.set_yscale('log')
-#     ax1.legend()
-    
-#     ax2.set_xlabel("Duration", fontsize=14)
-#     ax2.set_ylabel("PDF", fontsize=14)
-#     ax2.set_title("Avalanche Duration Distribution", fontsize=16)
-#     ax2.set_xscale('log')
-#     ax2.set_yscale('log')
-#     ax2.legend()
-    
-#     plt.tight_layout()
-#     plt.show()
 
 
 def grid_activity_timestep(paths: list, size: int):
@@ -219,63 +161,6 @@ def spike_activity_plot(paths: list, size: int):
     plt.show()
 
 
-# def origin_powerlaw_avalanche_plots(paths: list, method: str, thresh_m: float) -> None:
-#     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
-
-#     for path in paths:
-#         try:
-#             df_raster = load_data_csv(path)
-#             df_raster = df_raster.iloc[:1000]
-#             df = raster_to_basic(df_raster)
-#             df_transmission = raster_to_transmission(df_raster)
-#             avalanche = transmission_to_avalanche(df_transmission)
-#             sizes = []
-#             durations = []
-#             for i in range(len(avalanche)):
-#                 sizes.append(sum(avalanche[i]))
-#                 durations.append(len(avalanche[i]))
-#             sizes = [size for size in sizes if size > 0]
-#             durations = [duration for duration in durations if duration > 0]
-#             print(sizes)
-#             print(durations)
-#             if sizes and durations:
-#                 if method == 'fit':
-#                     if abs(branching_prameter(df) - 1) < thresh_m:
-#                         fit_sizes = powerlaw.Fit(sizes)
-#                         fit_sizes.power_law.plot_pdf(ax=ax1, color=np.random.rand(3,), linestyle='-')
-#                         fit_durations = powerlaw.Fit(durations)
-#                         fit_durations.power_law.plot_pdf(ax=ax2, color=np.random.rand(3,), linestyle='-')
-#                 elif method == 'plot':
-#                     if abs(branching_prameter(df) - 1) < thresh_m:
-#                         powerlaw.plot_pdf(sizes, ax=ax1, color=np.random.rand(3,), linestyle='--')
-#                         powerlaw.plot_pdf(durations, ax=ax2, color=np.random.rand(3,), linestyle='--')
-#                 elif method == 'scatter':
-#                     ax1.scatter(range(len(sizes)), sizes, color=np.random.rand(3,), linestyle='--')
-#                     ax2.scatter(range(len(durations)), durations, color=np.random.rand(3,), linestyle='--')
-#                 elif method == 'histogram':
-#                     ax1.hist(sizes, bins=len(sizes), log=True, color=np.random.rand(3,), linestyle='--')
-#                     ax2.hist(durations, bins=len(durations), log=True, color=np.random.rand(3,), linestyle='--')
-#             else:
-#                 print(f"{path} has no enough data")
-#         except Exception as e:
-#             print(f"Error processing file {path}: {e}")
-    
-#     ax1.set_xlabel("Size (s)", fontsize=14)
-#     ax1.set_ylabel("PDF", fontsize=14)
-#     ax1.set_title("Avalanche Size Distribution", fontsize=16)
-#     ax1.set_xscale('log')
-#     ax1.set_yscale('log')
-#     ax1.legend()
-    
-#     ax2.set_xlabel("Duration", fontsize=14)
-#     ax2.set_ylabel("PDF", fontsize=14)
-#     ax2.set_title("Avalanche Duration Distribution", fontsize=16)
-#     ax2.set_xscale('log')
-#     ax2.set_yscale('log')
-#     ax2.legend()
-    
-#     plt.tight_layout()
-#     plt.show()  
 
 
 def raster_to_basic(df: pd.DataFrame) -> pd.DataFrame:
