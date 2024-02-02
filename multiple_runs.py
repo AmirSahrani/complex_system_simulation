@@ -1,10 +1,10 @@
 import multiprocessing
-from sandpile import BTW
+from cellular_automata import CA
 
 def run_simulation(params, steps, file_name):
-    btw = BTW(**params)
-    btw.run(steps)
-    btw.write_data(file_name)
+    ca = CA(**params)
+    ca.run(steps)
+    ca.write_data(file_name)
 
 def simulation_wrapper(args):
     param_name, param_value = args
@@ -12,7 +12,7 @@ def simulation_wrapper(args):
     steps = 10000
     params = {
         "grid_size": grid_size,
-        "height": 8,
+        "threshold": 8,
         "refractory_period": 8,
         "probability_of_spontaneous_activity": 0.03,
         "max_distance": 3,
@@ -34,6 +34,7 @@ def run_multiprocess_simulation(param_name, param_values):
 
     pool.close()
     pool.join()
+
 
 if __name__ == "__main__":
     run_multiprocess_simulation("refractory_period", range(1, 10))
