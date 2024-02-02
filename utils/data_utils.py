@@ -1,7 +1,7 @@
 import numpy as np
 import csv as csv
 import pandas as pd
-from sandpile import BTW
+from cellular_automata import CA
 import os
 from typing import List
 from sklearn.feature_selection import mutual_info_regression
@@ -20,13 +20,13 @@ def load_data_csv(path: str) -> pd.DataFrame:
     """Load data from a CSV file."""
     return pd.read_csv(path, index_col=0)
 
-def ref_avg_spike_density(data:pd.DataFrame, size:int, refractory_period:int) -> float:
-    """Calculate the average spike density considering refractory period."""
-    # avg_spake_density is defined as avg[spikes_total / the number of neurons] in each time step
-    # return np.mean(data['spikes_total']) / float(size)**2
-    # avg_spake_density is defined as avg[spikes_total / （the number of neurons - the sum of spikes in last timestep)] in each timestep
-    densities = []
 
+def ref_avg_spike_density(data:pd.DataFrame, size:int, refractory_period:int) -> float:
+    """Calculate the average spike density considering refractory period.
+    Here, avg_spake_density is defined as avg[spikes_total / (the number of neurons - the sum of spikes in last timestep)] in each timestep.
+    Return np.mean(data['spikes_total']) / float(size)**2.
+    """
+    densities = []
     for index, row in data.iterrows():
         if row['spikes_neighbours'] != 0:
             if int(index) - refractory_period < 0:
@@ -41,9 +41,10 @@ def ref_avg_spike_density(data:pd.DataFrame, size:int, refractory_period:int) ->
 
 
 def avg_spike_density(data:pd.DataFrame, size:int) -> float:
-    """Calculate the average spike density without considering refractory period."""
-    # avg_spake_density is defined as avg[spikes_total / the number of neurons] in each time step
-    # Only count rows where spikes_neighbours is not zero
+    """Calculate the average spike density without considering refractory period.
+    Here, avg_spake_density is defined as avg[spikes_total / the number of neurons] in each time step.
+    Only count rows where spikes_neighbours is not zero.
+    """
     filtered_data = data[data['spikes_neighbours'] != 0]
     avg_density = np.mean(filtered_data['spikes_total']) / (size ** 2)
     return avg_density
@@ -57,8 +58,8 @@ def branching_prameter(spikes_df: pd.DataFrame) -> float:
     """
     df_copy = spikes_df.copy()
 
-    # Check if the last number of spikes_neighbours is nonzero
-    # If it's nonzero, add a new row with 0 spikes_neighbours after it
+    # Check if the last number of spikes_neighbours is nonzero.
+    # If it's nonzero, add a new row with 0 spikes_neighbours after it.
     if df_copy['spikes_neighbours'].iloc[-1] != 0:
         new_row = {col: 0 for col in df_copy.columns}
         new_row_df = pd.DataFrame([new_row])
@@ -221,14 +222,14 @@ def transmission_to_avalanche(transmission_df: pd.DataFrame) -> list:
             # If the ancestor of this transmission is not in any tree, create a new tree
             if len(target_tree_index) == 0:
                 trees.append({'time': t, 'tree': [[row['ancestor']], [row['descendant']]]})
-            # Record merge operations if the ancestor is in more than one tree
+            # Record merge operations if the ancestor is in more than one tree, and merge them later
             elif len(target_tree_index) > 1 and target_tree_index not in merge_operations:
                 merge_operations.append(target_tree_index)
 
         # Define a set to store the indices of trees to remove after merging
         trees_to_remove = set()
-
-        # Merge trees
+        
+        # Merge trees according to the recorded merge operations
         for indices in merge_operations:
             # Merge trees and update the list
             merged_tree = trees[indices[0]]['tree']
@@ -236,7 +237,6 @@ def transmission_to_avalanche(transmission_df: pd.DataFrame) -> list:
                 merged_tree = merge_trees(merged_tree, trees[index]['tree'])
                 # Add the index of the tree to the remove set
                 trees_to_remove.add(index)
-
             # Update the first tree with the merged tree
             trees[indices[0]]['tree'] = merged_tree
 
