@@ -18,9 +18,6 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
-[![Contributors][contributors-shield]][contributors-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
 
 
 
@@ -28,7 +25,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/amirsahrani/complex_system_simulation">
-    <img src="figures/round_spiral_round.gif" alt="Logo" width="80" height="80">
+    <img src="figures/round_spiral_round.gif" alt="Logo" width="200" height="200">
   </a>
 
 <h3 align="center">Criticality in the Cortex</h3>
