@@ -18,8 +18,8 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
-[![Contributors][contributors-shield]][contributors-url]
-[![MIT License][license-shield]][license-url]
+[![Contributors]][contributors-url]
+[![MIT License]][license-url]
 
 
 
@@ -73,7 +73,5 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
 [contributors-url]: https://github.com/amirsahrani/complex_system_simulation/graphs/contributors
-[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
 [license-url]: https://github.com/amirsahrani/complex_system_simulation/LICENSE.txt
