@@ -209,8 +209,6 @@ class BranchingNeurons():
         self.next_active = []  
         self.branching = []
         self.density = []
-        self.tracked_durations = {}
-        self.tracked_sizes = {}
         self.activity = []
         self.active_from_random = 0
     
@@ -244,7 +242,7 @@ class BranchingNeurons():
                     self.ax.plot([neuron.location[0], neighbor.location[0]], [neuron.location[1], neighbor.location[1]], c="gray", alpha=0.2, linewidth=0.2)
 
 
-    def run(self, steps: int):
+    def run(self, steps: int, random_adding: Optional[bool]=False):
         for i in tqdm(range(steps)):
             warmup = i > 0.1*steps
             self.random_activation()

@@ -338,8 +338,8 @@ def dynamic_range(output_nums: list) -> list:
     """
     spike_num = []
     probability = []
-    simulation_num = len(output_num)
-    count_dic = Counter(output_num)
+    simulation_num = len(output_nums)
+    count_dic = Counter(output_nums)
     for key, value in count_dic.items():
         spike_num.append(key)
         probability.append(value / simulation_num)
@@ -349,7 +349,7 @@ def dynamic_range(output_nums: list) -> list:
     return [spike_num_sorted, probability_sorted]
 
 
-def susceptibility(spike_history: list, neuron_num: int) -> list:
+def susceptibility(spike_history: list[int], neuron_num: int) -> list:
     """
     Calculate the susceptibility of a single simulation.
     """
@@ -357,3 +357,21 @@ def susceptibility(spike_history: list, neuron_num: int) -> list:
     spike_density = spike_history / neuron_num
     return np.var(spike_density)
 
+
+def raster_to_basic(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Convert the raster data to basic data:spikes_total, spikes_neighbours, spikes_input.
+    """
+    params_columns = ['grid_size', 'height', 'max_distance', 'refractory_period', 
+                      'probability_of_spontaneous_activity', 'random_connection']
+    df = df.drop(columns=params_columns, errors='ignore')
+    spikes_total = df.apply(lambda row: (row == 2).sum() + (row == 1).sum(), axis=1)
+    spikes_neighbours = df.apply(lambda row: (row == 2).sum(), axis=1)
+    spikes_input = df.apply(lambda row: (row == 1).sum(), axis=1)
+
+    df_basic = pd.DataFrame({
+        'spikes_total': spikes_total,
+        'spikes_neighbours': spikes_neighbours,
+        'spikes_input': spikes_input
+    })
+    return df_basic
