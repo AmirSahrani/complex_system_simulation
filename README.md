@@ -18,8 +18,6 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
-[![Contributors]][contributors-url]
-[![MIT License]][license-url]
 
 
 
@@ -71,7 +69,3 @@ A `requirements.txt` file has been provided, this should install any necessary l
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-[contributors-url]: https://github.com/amirsahrani/complex_system_simulation/graphs/contributors
-[license-url]: https://github.com/amirsahrani/complex_system_simulation/LICENSE.txt
