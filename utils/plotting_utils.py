@@ -36,99 +36,49 @@ def phase_transition_plot(data: pd.DataFrame):
 
 
 def spike_density_plot(paths: list, size: int) -> None:
-    """Plot the spike density."""
+    """Plot the spike density vs. branching ratio."""
     plt.style.use('tableau-colorblind10')
     plt.grid(True)
-    plt.figure(figsize=(10, 8)) 
-    plt.title("Average spike density vs. branching ratio", fontsize=16)
-    plt.xlabel("Branching Ratio", fontsize=14)
-    plt.ylabel("Average Spike Density", fontsize=14)
-    plt.xlim(0, 5)
-    plt.xticks(np.arange(0, 5.2, 0.2))
+    plt.figure(figsize=(8, 6)) 
+    plt.title("Not Considering Refractory Peirod", fontsize=20)
+    plt.xlabel("σ(Branching Ratio)", fontsize=18)
+    plt.ylabel("Average Spike Density", fontsize=18)
+    plt.xlim(0, 4)
+    plt.xticks(np.arange(0, 4.2, 0.2))
     for path in paths:  
         df = load_data_csv(path)
         # Plot the average spike density vs. the branching parameter
         density = avg_spike_density(df, size)
-        print(density)
         m = branching_prameter(df)
-        plt.scatter(m, density)
+        plt.scatter(m, density, color='black', s=10)
+    plt.axvline(x=1, color='orange', linestyle='-', linewidth=2)
     plt.show()
 
 
 def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> None:
-    """Plot the spike density."""
+    """Plot the spike density vs. branching ration while taking account of refractory period."""
     plt.style.use('tableau-colorblind10')
     plt.grid(True)
-    plt.figure(figsize=(10, 8)) 
-    plt.title("Average spike density vs. Branching Ratio", fontsize=16)
-    plt.xlabel("Branching Ratio", fontsize=14)
-    plt.ylabel("Average Spike Density", fontsize=14)
-    plt.xlim(0, 5)
-    plt.xticks(np.arange(0, 5.2, 0.2))
+    plt.figure(figsize=(8, 6)) 
+    plt.title("Considering Refractory Period", fontsize=20)
+    plt.xlabel("σ(Branching Ratio)", fontsize=18)
+    plt.ylabel("Average Spike Density", fontsize=18)
+    plt.xlim(0, 4)
+    plt.xticks(np.arange(0, 4.2, 0.2))
     for path, refractory_period in zip(paths, refractory_periods):  
         df = load_data_csv(path)
         # Plot the average spike density vs. the branching parameter
         density = ref_avg_spike_density(df, size,refractory_period)
-        print(density)
+        #print(density)
         m = branching_prameter(df)
-        plt.scatter(m, density)
+        plt.scatter(m, density, color='black', s=10)
+    plt.axvline(x=1, color='orange', linestyle='-', linewidth=2)
     plt.show()
-
-
-# def powerlaw_avalanche_plots(paths: list, method: list, thresh_m: float) -> None:
-#     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
-
-#     for path in paths:
-#         try:
-#             df = load_data_csv(path)
-#             sizes, durations = avalanche_distributions(df)
-#             sizes = [size for size in sizes if size > 0]
-#             durations = [duration for duration in durations if duration > 0]
-        
-#             if sizes and durations:
-#                 if method == 'fit':
-#                     if abs(branching_prameter(df) - 1) < thresh_m:
-#                         fit_sizes = powerlaw.Fit(sizes)
-#                         fit_sizes.power_law.plot_pdf(ax=ax1, color=np.random.rand(3,), linestyle='-')
-#                         fit_durations = powerlaw.Fit(durations)
-#                         fit_durations.power_law.plot_pdf(ax=ax2, color=np.random.rand(3,), linestyle='-')
-#                 elif method == 'plot':
-#                     if abs(branching_prameter(df) - 1) < thresh_m:
-#                         powerlaw.plot_pdf(sizes, ax=ax1, color=np.random.rand(3,), linestyle='--')
-#                         powerlaw.plot_pdf(durations, ax=ax2, color=np.random.rand(3,), linestyle='--')
-#                 elif method == 'scatter':
-#                     ax1.scatter(range(len(sizes)), sizes, color=np.random.rand(3,), linestyle='--')
-#                     ax2.scatter(range(len(durations)), durations, color=np.random.rand(3,), linestyle='--')
-#                 elif method == 'histogram':
-#                     ax1.hist(sizes, bins=len(sizes), log=True, color=np.random.rand(3,), linestyle='--')
-#                     ax2.hist(durations, bins=len(durations), log=True, color=np.random.rand(3,), linestyle='--')
-#             else:
-#                 print(f"{path} has no enough data")
-#         except Exception as e:
-#             print(f"Error processing file {path}: {e}")
-  
-#     ax1.set_xlabel("Size (s)", fontsize=14)
-#     ax1.set_ylabel("PDF", fontsize=14)
-#     ax1.set_title("Avalanche Size Distribution", fontsize=16)
-#     ax1.set_xscale('log')
-#     ax1.set_yscale('log')
-#     ax1.legend()
-    
-#     ax2.set_xlabel("Duration", fontsize=14)
-#     ax2.set_ylabel("PDF", fontsize=14)
-#     ax2.set_title("Avalanche Duration Distribution", fontsize=16)
-#     ax2.set_xscale('log')
-#     ax2.set_yscale('log')
-#     ax2.legend()
-    
-#     plt.tight_layout()
-#     plt.show()
 
 
 def grid_activity_timestep(paths: list, size: int):
     """Plot spike density vs. timestep. for ordered, complex(critical), chaotic stages."""
-
-    fig, axes = plt.subplots(len(paths), 1, sharex=True, figsize=(10, 8))
+    fig, axes = plt.subplots(len(paths), 1, sharex=True, figsize=(8, 6))
     
     plt.style.use('tableau-colorblind10')
     plt.grid(True)
@@ -144,10 +94,10 @@ def grid_activity_timestep(paths: list, size: int):
         elif i == 2:
             axes[i].set_title('Disordered')
         
-        axes[i].set_ylabel('Population activity')
+        axes[i].set_ylabel('Population Activity', fontsize=20)
         axes[i].set_ylim(0, 0.3)
     
-    plt.xlabel('Time steps')
+    plt.xlabel('Time Steps', fontsize=20)
     plt.xlim(0, 800)
     plt.tight_layout()
     plt.show()
@@ -219,7 +169,7 @@ def spike_activity_plot(paths: list, size: int):
     plt.style.use('tableau-colorblind10')
     plt.grid(True)
     num_plots = len(paths)
-    fig, axs = plt.subplots(num_plots, 1, sharex=True, figsize=(10, num_plots * 5))
+    fig, axs = plt.subplots(num_plots, 1, sharex=True, figsize=(7, num_plots * 4))
     
     if num_plots == 1:
         axs = [axs] 
@@ -238,16 +188,37 @@ def spike_activity_plot(paths: list, size: int):
         axs[idx].scatter(timesteps, neuron_numbers, color='black', s=0.1)
         
         # Set labels and limits for better clarity
-        axs[idx].set_ylabel(f"Neuron number", fontsize = 14)
+        axs[idx].set_ylabel(f"Neuron Number", fontsize = 16)
         axs[idx].set_ylim(-0.5, 400.5)  
         axs[idx].set_xlim(0, 500)
         
     # Set common labels
-    plt.xlabel("Time steps", fontsize = 14)
+    plt.xlabel("Time Steps", fontsize = 16)
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # Adjust the layout to make room for the common title
     
     # Show the plot
     plt.show()
+
+
+
+
+def raster_to_basic(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Convert the raster data to basic data:spikes_total, spikes_neighbours, spikes_input.
+    """
+    params_columns = ['grid_size', 'height', 'max_distance', 'refractory_period', 
+                      'probability_of_spontaneous_activity', 'random_connection']
+    df = df.drop(columns=params_columns, errors='ignore')
+    spikes_total = df.apply(lambda row: (row == 2).sum() + (row == 1).sum(), axis=1)
+    spikes_neighbours = df.apply(lambda row: (row == 2).sum(), axis=1)
+    spikes_input = df.apply(lambda row: (row == 1).sum(), axis=1)
+
+    df_basic = pd.DataFrame({
+        'spikes_total': spikes_total,
+        'spikes_neighbours': spikes_neighbours,
+        'spikes_input': spikes_input
+    })
+    return df_basic
 
         
 def mutual_info_plot(mutual_info: list, branching_ratios: list) -> None:
