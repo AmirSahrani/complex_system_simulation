@@ -43,7 +43,7 @@
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To jump straight into the figures and results you can take a look at the `analysis.ipynb` notebook. If you would like to look into the code behind these results, the cellular automata model can be found in the `sandpile.py` file (the name is a bit misleading, but this is model is a bit like a cross over between a CA and a sandpile model). The branching model can be found in the `branching.py` file. All python files  in the `utils` folder contain code used to deal with data, plotting or general utilies, these files are use to make the notebook more concise and reader friendly.
+To jump straight into the figures and results you can take a look at the `analysis.ipynb` notebook. If you would like to look into the code behind these results, the cellular automata model can be found in the `cellular_automata.py` file. The branching model can be found in the `branching.py` file. All python files  in the `utils` folder contain code used to deal with data, plotting or general utilies, these files are use to make the notebook more concise and reader friendly.
 
 If you would like to browser the docs, you can run the following command in the terminal once you have clone this repo.
 ```
