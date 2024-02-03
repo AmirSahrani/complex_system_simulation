@@ -5,4 +5,3 @@ powerlaw
 pytest
 scikit_learn
 tqdm
-multiprocessing
