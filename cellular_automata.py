@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from typing import List, Optional
-from utils.utils import *
+from utils.config import *
 
 
 class CA():
