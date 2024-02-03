@@ -235,17 +235,24 @@ def mutual_info_plot(mutual_info: list, branching_ratios: list) -> None:
     plt.show()
 
 
-def dynamic_range_plot(spike_num: list, probability: list, branching_ratio: float) -> None:
+def dynamic_range_plot(dynamic_ranges: list, branching_ratios: list, ax: plt.plot = None) -> None:
     """
-    Plot the dynamic range of a certain branching ratio.
+    Show the dynamic range of a certain branching ratio
     """
+    width = []
+    for i in range(len(branching_ratios)):
+        probs = np.cumsum(dynamic_ranges[i][1])
+        start = np.argmax(probs > 0.1)
+        end = np.argmax(probs > 0.9)
+        width.append(len(dynamic_ranges[i][1][start:end]))
+
+    std_err = np.std(width) / np.sqrt(len(width))
     plt.style.use('tableau-colorblind10')
     plt.grid(True)
-    plt.figure(figsize=(12, 8))
-    plt.plot(spike_num, probability)
-    plt.xlabel("Response, number of neurons", fontsize=14)
-    plt.ylabel("Probability (Response)", fontsize=14)
-    plt.title(f"Branching Ratio = {branching_ratio}", fontsize=16)
+    plt.errorbar(branching_ratios, width, yerr=std_err, fmt='--', markersize=3, alpha=0.8)
+    plt.xlabel("Branching Ratio", fontsize=14)
+    plt.ylabel("Dynamic Range (width)", fontsize=14)
+    plt.title('Dynamic Ranges vs Branching Ratios', fontsize=16)
     plt.show()
 
 
