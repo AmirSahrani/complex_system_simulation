@@ -8,7 +8,7 @@ from branching import BranchingNeurons
 
 def power_law_plot(data, data_type='size'):
     """Plot a distribution on log-log axes."""
-
+    plt.figure(figsize=(8, 6))
     plt.style.use('tableau-colorblind10')
     plt.grid(True)
     plt.hist(data, bins=len(data), log=True)
@@ -26,6 +26,7 @@ def power_law_plot(data, data_type='size'):
 
 def phase_transition_plot(data: pd.DataFrame):
     """Plot a phase transition."""
+    plt.figure(figsize=(8, 6))
     plt.style.use('tableau-colorblind10')
     plt.grid(True)
     plt.plot(data["Control parameter"], data["Order parameter"])
@@ -37,9 +38,9 @@ def phase_transition_plot(data: pd.DataFrame):
 
 def spike_density_plot(paths: list, size: int) -> None:
     """Plot the spike density vs. branching ratio."""
+    plt.figure(figsize=(8, 6))
     plt.style.use('tableau-colorblind10')
     plt.grid(True)
-    plt.figure(figsize=(8, 6)) 
     plt.title("Not Considering Refractory Peirod", fontsize=20)
     plt.xlabel("σ(Branching Ratio)", fontsize=18)
     plt.ylabel("Average Spike Density", fontsize=18)
@@ -57,9 +58,9 @@ def spike_density_plot(paths: list, size: int) -> None:
 
 def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> None:
     """Plot the spike density vs. branching ration while taking account of refractory period."""
+    plt.figure(figsize=(8, 6))
     plt.style.use('tableau-colorblind10')
     plt.grid(True)
-    plt.figure(figsize=(8, 6)) 
     plt.title("Considering Refractory Period", fontsize=20)
     plt.xlabel("σ(Branching Ratio)", fontsize=18)
     plt.ylabel("Average Spike Density", fontsize=18)
@@ -166,10 +167,10 @@ def plot_activity_per_time_step(n_steps: int, ax: Optional[plt.plot]=None, **kwa
 
 def spike_activity_plot(paths: list, size: int):
     """Plot the raster spike activity."""
-    plt.style.use('tableau-colorblind10')
-    plt.grid(True)
     num_plots = len(paths)
     fig, axs = plt.subplots(num_plots, 1, sharex=True, figsize=(7, num_plots * 4))
+    plt.style.use('tableau-colorblind10')
+    plt.grid(True)
     
     if num_plots == 1:
         axs = [axs] 
@@ -225,9 +226,9 @@ def mutual_info_plot(mutual_info: list, branching_ratios: list) -> None:
     """
     Plot mutual information vs. branching ratio.
     """
+    plt.figure(figsize=(12, 8))
     plt.style.use('tableau-colorblind10')
     plt.grid(True)
-    plt.figure(figsize=(12, 8))
     plt.plot(branching_ratios, mutual_info)
     plt.xlabel("Branching Ratio", fontsize=14)
     plt.ylabel("Mutual Information", fontsize=14)
@@ -247,6 +248,7 @@ def dynamic_range_plot(dynamic_ranges: list, branching_ratios: list, ax: plt.plo
         width.append(len(dynamic_ranges[i][1][start:end]))
 
     std_err = np.std(width) / np.sqrt(len(width))
+    plt.figure(figsize=(12, 8))
     plt.style.use('tableau-colorblind10')
     plt.grid(True)
     plt.errorbar(branching_ratios, width, yerr=std_err, fmt='--', markersize=3, alpha=0.8)
@@ -260,8 +262,8 @@ def susceptibility_plot(susceptibilities: list, errors: list, branching_ratios: 
     """
     Plot susceptibility vs. branching ratio.
     """
-    plt.style.use('tableau-colorblind10')
     plt.figure(figsize=(12, 8))
+    plt.style.use('tableau-colorblind10')
     plt.errorbar(branching_ratios, susceptibilities, yerr=errors, fmt='--', capsize=5) 
     plt.xlabel("Branching Ratio", fontsize=14)
     plt.ylabel("Susceptibility", fontsize=14)
@@ -271,6 +273,9 @@ def susceptibility_plot(susceptibilities: list, errors: list, branching_ratios: 
 
 
 def loglog_plotting_size_duration(type: List[str], data: pd.DataFrame, grouped_branching: pd.DataFrame):
+    """
+    Plot loglog plot of size vs duration for different branching ratios.
+    """
     fig, ax =plt.subplots(2,3, figsize=(12,8))
     ax = ax.ravel()
     for i in range(6):
@@ -284,8 +289,6 @@ def loglog_plotting_size_duration(type: List[str], data: pd.DataFrame, grouped_b
         all_duration = np.concatenate(all_data[type[1]].values)
         all_duration = all_duration[all_duration > 0]
 
-
-
         ax[i].loglog(all_size, all_duration, linestyle='None', marker='o', markersize=3, alpha=0.5)
         ax[i].set_title(f'Branching ratio: {grouped_branching.index[offset+i]:.2f}')
         ax[i].grid(True)
@@ -295,8 +298,13 @@ def loglog_plotting_size_duration(type: List[str], data: pd.DataFrame, grouped_b
     fig.suptitle(f'Loglog plot of {type[0]} vs {type[1]}', fontsize=16)
     plt.tight_layout()
     plt.show()
-        
+
+
 def plot_mean_density_vs_branching_ratio(grouped_branching, critical_point):
+    """
+    Plot mean density vs branching ratio.
+    """
+    plt.figure(figsize=(12, 8))
     plt.style.use('tableau-colorblind10')
     plt.grid(True)
     plt.plot(grouped_branching.index, grouped_branching['mean_density'])
@@ -310,7 +318,12 @@ def plot_mean_density_vs_branching_ratio(grouped_branching, critical_point):
     plt.title('Mean Density vs Branching Ratio')
     plt.show()
 
+
 def plot_phase_transition_cooldowns(grouped_cooldowns):
+    """
+    Plot phase transition for different refractory periods.
+    """
+    plt.figure(figsize=(12, 8))
     plt.style.use('tableau-colorblind10')
     plt.grid(True)
     for i in [0,1,3,5]:
@@ -326,6 +339,10 @@ def plot_phase_transition_cooldowns(grouped_cooldowns):
 
     
 def plot_emperical_branching_ratio(grouped_branching):
+    """
+    Plot emperical branching ratio vs branching ratio.
+    """
+    plt.figure(figsize=(12, 8))
     plt.style.use('tableau-colorblind10')
     plt.grid(True)
     plt.scatter(grouped_branching.index, grouped_branching['emperical_branching_ratio'], label='Branching ratio')
