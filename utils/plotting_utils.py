@@ -104,6 +104,7 @@ def grid_activity_timestep(paths: list, size: int):
 
 
 def loglog_plotting(type: str, data: pd.DataFrame, grouped_branching: pd.DataFrame):
+    """Plot the log log probability distribution of the data."""
     fig, ax =plt.subplots(2,3, figsize=(12,8))
     ax = ax.ravel()
     for i in range(6):
@@ -144,6 +145,7 @@ def loglog_plotting(type: str, data: pd.DataFrame, grouped_branching: pd.DataFra
     plt.show()
 
 def plot_activity_per_time_step(n_steps: int, ax: Optional[plt.plot]=None, **kwargs) -> None:
+    """Plot activity per time step for branching model's different branching ratio."""
     if ax is None:
         fig, ax = plt.subplots(3, figsize=(15, 6))
     
@@ -166,8 +168,7 @@ def spike_activity_plot(paths: list, size: int):
     """Plot the raster spike activity."""
     num_plots = len(paths)
     fig, axs = plt.subplots(num_plots, 1, sharex=True, figsize=(7, num_plots * 4))
-    plt.style.use('tableau-colorblind10')
-    plt.grid(True)
+    
     
     if num_plots == 1:
         axs = [axs] 
@@ -193,7 +194,8 @@ def spike_activity_plot(paths: list, size: int):
     # Set common labels
     plt.xlabel("Time Steps", fontsize = 16)
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # Adjust the layout to make room for the common title
-    
+    plt.style.use('tableau-colorblind10')
+    plt.grid(True)
     # Show the plot
     plt.show()
 
