@@ -1,6 +1,16 @@
 from typing import Callable
 from tqdm import tqdm
 import numpy as np
+import multiprocessing
+from cellular_automata import CA
+
+# Configurations for showing different patterns of neural activity.
+kwargs_round_spiral = {"threshold": 4, "refractory_period": 5, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
+kwargs_pulse_wave = {"threshold": 5, "refractory_period": 4, "probability_of_spontaneous_activity": 0.03, "max_distance": 3, "visualize": True, "random_connection": False}
+kwargs_synchronous = {"threshold": 3, "refractory_period": 5, "probability_of_spontaneous_activity": 0.015, "max_distance": 2.5, "visualize": True, "random_connection": True}
+kwargs_oscillatory = {"threshold": 2, "refractory_period": 4, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
+kwargs_repeating = {"threshold": 2, "refractory_period": 4, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": True}
+kwargs_random = {"threshold": 5, "refractory_period": 5, "probability_of_spontaneous_activity": 0.02, "max_distance": 3, "visualize": True, "random_connection": False}
 
 
 def simulate(simulation: Callable, n_runs: int, duration: int, **kwargs):
@@ -19,7 +29,8 @@ def simulate(simulation: Callable, n_runs: int, duration: int, **kwargs):
         })
         sim.reset()
     return results
-        
+
+       
 def get_density(data):
     density = []
     values = np.unique(data)
@@ -27,5 +38,46 @@ def get_density(data):
         density.append(np.sum(data == value) / len(data))
     return values,density
 
+
 def closest_index_to_value(array, value):
     return np.argmin(np.abs(array - value))
+
+
+def run_simulation(params, steps, file_name):
+    ca = CA(**params)
+    ca.run(steps)
+    ca.write_data(file_name)
+
+
+def simulation_wrapper(args):
+    param_name, param_value = args
+    grid_size = [50, 50]
+    steps = 10000
+    params = {
+        "grid_size": grid_size,
+        "threshold": 8,
+        "refractory_period": 8,
+        "probability_of_spontaneous_activity": 0.03,
+        "max_distance": 3,
+        "visualize": False,
+        "random_connection": False
+    }
+
+    params[param_name] = param_value
+
+    file_name = f"data/new_varying_{param_name}_{param_value}_h_8.csv"
+    run_simulation(params, steps, file_name)
+
+
+def run_multiprocess_simulation(param_name, param_values):
+    args_list = [(param_name, value) for value in param_values]
+
+    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+    pool.map(simulation_wrapper, args_list)
+
+    pool.close()
+    pool.join()
+
+
+if __name__ == "__main__":
+    run_multiprocess_simulation("refractory_period", range(1, 10))

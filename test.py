@@ -1,4 +1,4 @@
-from sandpile import BTW
+from cellular_automata import CA
 from utils.data_utils import *
 from pandas.testing import assert_frame_equal
 from branching import *
@@ -11,35 +11,35 @@ import random
 
 def test_init_grid():
     '''
-    Test the init_grid method of the BTW class.
+    Test the init_grid method of the CA class.
     Currently the random method relies on not accidentally picking the same point twice.
     '''
-    btw = BTW([10, 10], 4)
-    btw.init_grid("random", 5)
-    assert np.where(btw.grid > 0)[0].shape[0] == 5, "Grid not initialized correctly using random method."
+    ca = CA([10, 10], 4)
+    ca.init_grid("random", 5)
+    assert np.where(ca.grid > 0)[0].shape[0] == 5, "Grid not initialized correctly using random method."
 
-    btw.init_grid("custom", 5, lambda x: x + 5)
-    grid_surface_area = btw.grid.shape[0] * btw.grid.shape[1]
-    assert np.sum(btw.grid) == 5 * grid_surface_area, "Grid not initialized correctly using custom method."
+    ca.init_grid("custom", 5, lambda x: x + 5)
+    grid_surface_area = ca.grid.shape[0] * ca.grid.shape[1]
+    assert np.sum(ca.grid) == 5 * grid_surface_area, "Grid not initialized correctly using custom method."
 
 
 def test_add_grain():
-    btw = BTW([20, 20], probability_of_spontaneous_activity=0.03)
-    btw.add_grain()
-    sum_spikes = np.count_nonzero(btw.grid)
+    ca = CA([20, 20], probability_of_spontaneous_activity=0.03)
+    ca.add_grain()
+    sum_spikes = np.count_nonzero(ca.grid)
     assert sum_spikes > 0 and sum_spikes < 100, "Grains are not added correctly."
 
 
 def test_run():
-    btw = BTW(grid_size=[10, 10], height=4, probability_of_spontaneous_activity=0.03, max_distance=2, visualize=False)
+    ca = CA(grid_size=[10, 10], threshold=4, probability_of_spontaneous_activity=0.03, max_distance=2, visualize=False)
 
     num_steps = 100
-    btw.run(num_steps)
+    ca.run(num_steps)
     
-    assert len(btw.spikes_neighbours) == num_steps, "Incorrect length of spikes_neighbours list."
-    assert len(btw.spikes_total) == num_steps, "Incorrect length of spikes_total list."
+    assert len(ca.spikes_neighbours) == num_steps, "Incorrect length of spikes_neighbours list."
+    assert len(ca.spikes_total) == num_steps, "Incorrect length of spikes_total list."
 
-    for neighbour_spikes, total_spikes in zip(btw.spikes_neighbours, btw.spikes_total):
+    for neighbour_spikes, total_spikes in zip(ca.spikes_neighbours, ca.spikes_total):
         assert total_spikes >= 0, "Total spikes should be non-negative."
         assert total_spikes >= neighbour_spikes, "Total spikes should be greater than or equal to input spikes."
 
@@ -48,16 +48,16 @@ def test_run():
         
 
 def test_writing():
-    kwargs = {"grid_size": [6, 6], "height": 6, "max_distance": 6, "refractory_period": 6, "probability_of_spontaneous_activity": 0.06, "random_connection": False}
-    btw = BTW(**kwargs)
-    btw.spikes_neighbours = [1, 2, 3]
-    btw.spikes_total = [7, 5, 9]
-    btw.write_data(path="data/test")
+    kwargs = {"grid_size": [6, 6], "threshold": 6, "max_distance": 6, "refractory_period": 6, "probability_of_spontaneous_activity": 0.06, "random_connection": False}
+    ca = CA(**kwargs)
+    ca.spikes_neighbours = [1, 2, 3]
+    ca.spikes_total = [7, 5, 9]
+    ca.write_data(path="data/test")
     data_read = load_data_csv(path="data/test")
 
     # Check if the data is correct
     assert data_read['grid_size'][0] == 36, "Grid size is not correct."
-    assert data_read['height'][0] == 6, "Height is not correct."
+    assert data_read['threshold'][0] == 6, "Height is not correct."
     assert data_read['max_distance'][0] == 6, "Max distance is not correct."
     assert data_read['refractory_period'][0] == 6, "Refractory period is not correct."
     assert data_read['probability_of_spontaneous_activity'][0] == 0.06, "Probability of spontaneous activity is not correct."
@@ -97,10 +97,10 @@ def test_check_neighbors():
 
     
     for i, (test, control) in enumerate(zip([grid_test_1, grid_test_2, grid_test_3], [grid_cont_1, grid_cont_2, grid_cont_3]), start=3):
-        btw = BTW([i, i], height=4, max_distance=1.5)
-        btw.grid = test
-        btw.check_neighbors()
-        assert np.all(btw.grid == control), f'Grid not correctly updated. \n {btw.grid} \n {control}'
+        ca = CA([i, i], threshold=4, max_distance=1.5)
+        ca.grid = test
+        ca.check_neighbors()
+        assert np.all(ca.grid == control), f'Grid not correctly updated. \n {ca.grid} \n {control}'
 
 # def test_to_bin():
 #     df = pd.DataFrame({

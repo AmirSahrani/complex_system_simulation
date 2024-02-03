@@ -1,4 +1,4 @@
-,grid_size,height,max_distance,refractory_period,probability_of_spontaneous_activity,random_connection,spikes_total,spikes_neighbours,spikes_input
+,grid_size,threshold,max_distance,refractory_period,probability_of_spontaneous_activity,random_connection,spikes_total,spikes_neighbours,spikes_input
 0,36.0,6.0,6.0,6.0,0.06,False,7,1,6
 1,,,,,,,5,2,3
 2,,,,,,,9,3,6

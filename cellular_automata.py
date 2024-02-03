@@ -3,16 +3,25 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from typing import List, Optional
-from config import *
+from utils.utils import *
 
 
-class BTW():
-    """Bak-Tang-Wiesenfeld sandpile model.
-    Initialize with a grid size, model will be initialized with all zeros.
+class CA():
     """
-    def __init__(self, grid_size: List, height: int=2, visualize: bool=False, max_distance: float=3, refractory_period: int=3, probability_of_spontaneous_activity: float=0.02, random_connection: bool=False) -> None:
+    Class for cellular automata model.
+    """
+    def __init__(self, grid_size: List, threshold: int=2, visualize: bool=False, max_distance: float=3, refractory_period: int=3, probability_of_spontaneous_activity: float=0.02, random_connection: bool=False) -> None:
+        """Initialize the model.
+        :param grid_size: The size of the grid.
+        :param threshold: The critical threshold of the sandpile.
+        :param visualize: Whether to visualize the model.
+        :param max_distance: The maximum distance between neurons to connect.
+        :param refractory_period: The refractory period of the neurons.
+        :param probability_of_spontaneous_activity: The probability of spontaneous activity.
+        :param random_connection: Whether to use random connections between neurons.
+        """
         self.grid = np.zeros(grid_size)
-        self.max_height = height
+        self.threshold = threshold
         self.direction = []
         self.visualize = visualize
         self.refractory_period = refractory_period
@@ -28,7 +37,7 @@ class BTW():
         else:
             self.neighbormap()
         if self.visualize:
-            self.cm = plt.get_cmap("viridis", self.max_height + 1)
+            self.cm = plt.get_cmap("viridis", self.threshold + 1)
             self.setup_plot()
 
 
@@ -49,7 +58,7 @@ class BTW():
             
         if method == "random":
             grid_points = (random.sample(range(self.grid.shape[0]), N), random.sample(range(self.grid.shape[1]), N))
-            self.grid[grid_points[0], grid_points[1]] = self.max_height
+            self.grid[grid_points[0], grid_points[1]] = self.threshold
         elif method == "custom":
             self.grid = func(self.grid)
 
@@ -80,7 +89,7 @@ class BTW():
         # Randomly activate neurons based on probability
         add_matrix = np.random.random(self.grid.shape) < self.probability_of_spontaneous_activity
         # Activate neurons that are not in refractory and have been randomly chosen
-        self.grid[not_in_ref & add_matrix] = self.max_height
+        self.grid[not_in_ref & add_matrix] = self.threshold
 
 
     def neighbormap(self) -> None:
@@ -95,9 +104,9 @@ class BTW():
 
     def check_neighbors(self) -> None:
         """
-        Check if any points on the grid are over the critical height. If so, topple them.
+        Check if any points on the grid are over the critical threshold. If so, topple them.
         """
-        toppled = np.where(self.grid >= self.max_height)
+        toppled = np.where(self.grid >= self.threshold)
 
         if self.random_connection:
             for location in zip(*toppled):
@@ -116,8 +125,8 @@ class BTW():
                     x, y = location[0] + d[0], location[1] + d[1]
                     if x >= 0 and x < self.grid.shape[0] and y >= 0 and y < self.grid.shape[1] and self.refractory_matrix[x, y] == 0:
                         self.grid[x, y] += 1
-        self.grid = self.grid >= self.max_height
-        self.grid = self.grid.astype(int) * self.max_height
+        self.grid = self.grid >= self.threshold
+        self.grid = self.grid.astype(int) * self.threshold
 
 
     def run(self, steps: int) -> None:
@@ -178,7 +187,7 @@ class BTW():
         # Save the parameters     
         raster_df = pd.DataFrame(raster_data)
         raster_df['grid_size'] = self.grid.shape[0] * self.grid.shape[1]
-        raster_df['height'] = self.max_height
+        raster_df['threshold'] = self.threshold
         raster_df['max_distance'] = self.max_distance
         raster_df['refractory_period'] = self.refractory_period
         raster_df['probability_of_spontaneous_activity'] = self.probability_of_spontaneous_activity
@@ -192,7 +201,7 @@ class BTW():
         Collect single set of self.spikes_neighbors, self.spikes_total and spikes_input to one dataframe.
         """
         args = {"grid_size": self.grid.shape[0] * self.grid.shape[1], 
-                "height": self.max_height, 
+                "threshold": self.threshold, 
                 "max_distance": self.max_distance, 
                 "refractory_period": self.refractory_period, 
                 "probability_of_spontaneous_activity": self.probability_of_spontaneous_activity, 
@@ -219,20 +228,20 @@ class BTW():
 
 
 
-class CA_continuous_threshold(BTW):
+class CA_continuous_threshold(CA):
     """
     Continuous threshold model.
     """
-    def __init__(self, grid_size: List, height: int=2, visualize: bool=False, max_distance: float=3, refractory_period: int=3, probability_of_spontaneous_activity: float=0.02, random_connection: bool=False, threshold: float=2.0) -> None:
-        super().__init__(grid_size, height, visualize, max_distance, refractory_period, probability_of_spontaneous_activity, random_connection)
+    def __init__(self, grid_size: List, threshold: float=2., visualize: bool=False, max_distance: float=3, refractory_period: int=3, probability_of_spontaneous_activity: float=0.02, random_connection: bool=False) -> None:
+        super().__init__(grid_size, int(threshold), visualize, max_distance, refractory_period, probability_of_spontaneous_activity, random_connection)
         self.threshold = threshold
 
 
     def check_neighbors(self) -> None:
         """
-        Check if any points on the grid are over the critical height. If so, topple them.
+        Check if any points on the grid are over the critical threshold. If so, topple them.
         """
-        toppled = np.where(self.grid >= self.max_height)
+        toppled = np.where(self.grid >= self.threshold)
         p = 1 - (self.threshold % 1)    # e.g., if threshold = 2.7, then p = 0.3
 
         if self.random_connection:
@@ -256,15 +265,10 @@ class CA_continuous_threshold(BTW):
         probs = np.random.random(self.grid.shape)
         might_spike = np.logical_and(self.grid+1-p == self.threshold, probs < p)
         self.grid = np.logical_or(must_spike, might_spike)
-        self.grid = self.grid.astype(int) * self.max_height
+        self.grid = self.grid.astype(int) * self.threshold
 
 
 
 if __name__ == "__main__":
-    btw = BTW(grid_size=[50, 50], height=3, visualize=True, max_distance=3, refractory_period=7, probability_of_spontaneous_activity=0.02, random_connection=False)
-    # btw = BTW(grid_size=[50, 50], refractory_period=3,height=2,probability_of_spontaneous_activity=0.02,max_distance=3,random_connection=False, visualize=True)
-    btw.run(10000)
-    # btw.write_data("data/test")
-    # btw.collect_raster_data(1000, "data/test_raster")
-    #CA1 = CA_continuous_threshold(grid_size=[50, 50], refractory_period=3, height=5, probability_of_spontaneous_activity=0.03, max_distance=3, random_connection=False, visualize=True, threshold=5.1)
-    #CA1.run(10000)
+    ca = CA(grid_size=[50, 50], **kwargs_oscillatory)
+    ca.run(10000)

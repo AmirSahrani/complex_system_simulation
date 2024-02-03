@@ -4,6 +4,7 @@ from typing import Counter, List, Optional, Tuple
 from tqdm import tqdm
 
 if __name__ != "__main__":
+    # Some janky way to make the code work with the notebook
     def tqdm(x):
         return x
 
@@ -37,6 +38,9 @@ class Neuron():
 
 
     def generate_probabilities(self):
+        """ 
+         Generates the probabilities of activation for each neighboring neuron. Adheres to the branching ratio.
+        """
         assert len(self.neighbors) > 0, "Neuron has no neighbors."
 
         n_probs = len(self.neighbors)
@@ -61,49 +65,27 @@ class Neuron():
 
 class BranchingNeurons():
     """
-    Class representing a branching model for neurons.
+    Class representing a network of branching neurons.
 
-    Attributes:
-        neurons (list): List of Neuron objects representing the neurons in the network.
-        p (float): Probability of connection between two neurons.
-        visual (bool): Boolean indicating whether to visualize a run of the simulation.
-        evalanche_size (list): List to store the size of each avalanche during the simulation.
-        evalanche_duration (list): List to store the duration of each avalanche during the simulation.
-        active (list): List of active neurons during the simulation.
-
-    Methods:
-        __init__(self, connection_probability: float, N:int, spread_probability: float, visual: bool=False) -> None:
-            Initializes the Branching model for neurons.
-
-        init_network(self) -> None:
-            Initializes the network by connecting neurons based on the connection probability.
-
-        propage_activations(self):
-            Propagates activations through the network until no more activations are possible.
-
-        reset(self):
-            Resets the state of the neurons and the active neuron list.
-
-        random_activation(self):
-            Randomly activates neurons based on the connection probability.
-
-        setup_plot(self):
-            Sets up the plot for visualization.
-
-        plot(self):
-            Plots the current state of the network.
-
-        run(self, steps):
-            Runs the simulation for the specified number of steps.
-
-        plot_evalanche_size(self):
-            Plots the size of each avalanche during the simulation.
-
-        plot_evalanche_duration(self):
-            Plots the duration of each avalanche during the simulation.
+    Parameters:
+    - N (int): Number of neurons in the network.
+    - max_neighbors (int): Maximum number of neighbors each neuron can have.
+    - branching_ratio (float): Branching ratio for neuron connections.
+    - cooldown (int, optional): Cooldown period for neurons after activation. Default is 0.
+    - visual (bool, optional): Flag indicating whether to visualize the network. Default is False.
     """
 
     def __init__(self, N:int, max_neighbors: int, branching_ratio: float, cooldown: int = 0,  visual: bool=False) -> None:
+        """
+        Initializes a network of branching neurons.
+
+        Args:
+        - N (int): Number of neurons in the network.
+        - max_neighbors (int): Maximum number of neighbors each neuron can have, most neurons will have exactly this number.
+        - branching_ratio (float): Branching ratio for neuron connections.
+        - cooldown (int, optional): Cooldown period for neurons after activation. Default is 0. Analogous to the refractory period in the other model.
+        - visual (bool, optional): Flag indicating whether to visualize the network. Default is False.
+        """
 
         self.neurons = [Neuron(tuple(np.random.random(2)), 
                                branching_ratio) for i in range(N)]
@@ -132,6 +114,10 @@ class BranchingNeurons():
     
 
     def init_network(self) -> None:
+        """
+        Initializes the network by connecting neurons based on the branching ratio.
+        """
+
         copy_neurons = self.neurons.copy()
 
         if __name__ == "__main__":
@@ -161,6 +147,13 @@ class BranchingNeurons():
 
 
     def propage_activations(self, neuron: Neuron):
+        """
+        Propagates activations from a given neuron to its neighbors.
+
+        Args:
+        - neuron (Neuron): The neuron to propagate activations from.
+        """
+
         assert neuron.active, "Neuron is not active."
 
         neuron.activated_neighbors = []
@@ -178,8 +171,6 @@ class BranchingNeurons():
 
                     neighbor.avalanche_id = moving_avalance_id
                     self.tracked_sizes[moving_avalance_id] += 1
-
-
 
                     if not changed_avalanche:
                         self.tracked_durations[moving_avalance_id] += 1
@@ -200,6 +191,10 @@ class BranchingNeurons():
 
 
     def reset(self):
+        """
+        Resets the network to its initial state.
+        """
+
         for neuron in self.neurons:
             neuron.active = 0
             neuron.activated_neighbors = []
@@ -209,13 +204,15 @@ class BranchingNeurons():
         self.next_active = []  
         self.branching = []
         self.density = []
-        self.tracked_durations = {}
-        self.tracked_sizes = {}
         self.activity = []
         self.active_from_random = 0
     
     
     def random_activation(self):
+        """
+        Activates random neurons in the network.
+        """
+
         self.active_from_random = 0
         for neuron in self.neurons:
             if np.random.random() < 1e-5 and not neuron.active: 
@@ -225,10 +222,18 @@ class BranchingNeurons():
 
     
     def setup_plot(self):
+        """
+        Sets up the plot for visualizing the network.
+        """
+
         self.fig, self.ax = plt.subplots()
     
 
     def plot(self):
+        """
+        Plots the current state of the network.
+        """
+
         self.ax.clear()
         for neuron in self.neurons:
             if neuron.active:
@@ -244,7 +249,15 @@ class BranchingNeurons():
                     self.ax.plot([neuron.location[0], neighbor.location[0]], [neuron.location[1], neighbor.location[1]], c="gray", alpha=0.2, linewidth=0.2)
 
 
-    def run(self, steps: int):
+    def run(self, steps: int, random_adding: Optional[bool]=True):
+        """
+        Runs the simulation for the specified number of steps.
+
+        Args:
+        - steps (int): Number of simulation steps to run.
+        - random_adding (bool, optional): Flag indicating whether to randomly activate neurons during the simulation. Default is True.
+        """
+
         for i in tqdm(range(steps)):
             warmup = i > 0.1*steps
             self.random_activation()
