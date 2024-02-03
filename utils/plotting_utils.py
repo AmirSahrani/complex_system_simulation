@@ -79,10 +79,7 @@ def ref_spike_density_plot(paths: list, size: int, refractory_periods: list) -> 
 
 def grid_activity_timestep(paths: list, size: int):
     """Plot spike density vs. timestep. for ordered, complex(critical), chaotic stages."""
-    fig, axes = plt.subplots(len(paths), 1, sharex=True, figsize=(8, 6))
-    
-    plt.style.use('tableau-colorblind10')
-    plt.grid(True)
+    fig, axes = plt.subplots(len(paths), 1, sharex=True, figsize=(8, 10))
     for i, path in enumerate(paths):
         df = pd.read_csv(path)
         df['spike_density'] = df.apply(lambda x: 0 if x['spikes_neighbours'] == 0 else x['spikes_total'] / (size ** 2), axis=1)
@@ -95,7 +92,7 @@ def grid_activity_timestep(paths: list, size: int):
         elif i == 2:
             axes[i].set_title('Disordered')
         
-        axes[i].set_ylabel('Population Activity', fontsize=20)
+        axes[i].set_ylabel('Population Activity', fontsize=15)
         axes[i].set_ylim(0, 0.3)
     
     plt.xlabel('Time Steps', fontsize=20)
@@ -107,6 +104,7 @@ def grid_activity_timestep(paths: list, size: int):
 
 
 def loglog_plotting(type: str, data: pd.DataFrame, grouped_branching: pd.DataFrame):
+    """Plot the log log probability distribution of the data."""
     fig, ax =plt.subplots(2,3, figsize=(12,8))
     ax = ax.ravel()
     for i in range(6):
@@ -147,6 +145,7 @@ def loglog_plotting(type: str, data: pd.DataFrame, grouped_branching: pd.DataFra
     plt.show()
 
 def plot_activity_per_time_step(n_steps: int, ax: Optional[plt.plot]=None, **kwargs) -> None:
+    """Plot activity per time step for branching model's different branching ratio."""
     if ax is None:
         fig, ax = plt.subplots(3, figsize=(15, 6))
     
@@ -169,8 +168,7 @@ def spike_activity_plot(paths: list, size: int):
     """Plot the raster spike activity."""
     num_plots = len(paths)
     fig, axs = plt.subplots(num_plots, 1, sharex=True, figsize=(7, num_plots * 4))
-    plt.style.use('tableau-colorblind10')
-    plt.grid(True)
+    
     
     if num_plots == 1:
         axs = [axs] 
@@ -196,30 +194,14 @@ def spike_activity_plot(paths: list, size: int):
     # Set common labels
     plt.xlabel("Time Steps", fontsize = 16)
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # Adjust the layout to make room for the common title
-    
+    plt.style.use('tableau-colorblind10')
+    plt.grid(True)
     # Show the plot
     plt.show()
 
 
 
 
-def raster_to_basic(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Convert the raster data to basic data:spikes_total, spikes_neighbours, spikes_input.
-    """
-    params_columns = ['grid_size', 'height', 'max_distance', 'refractory_period', 
-                      'probability_of_spontaneous_activity', 'random_connection']
-    df = df.drop(columns=params_columns, errors='ignore')
-    spikes_total = df.apply(lambda row: (row == 2).sum() + (row == 1).sum(), axis=1)
-    spikes_neighbours = df.apply(lambda row: (row == 2).sum(), axis=1)
-    spikes_input = df.apply(lambda row: (row == 1).sum(), axis=1)
-
-    df_basic = pd.DataFrame({
-        'spikes_total': spikes_total,
-        'spikes_neighbours': spikes_neighbours,
-        'spikes_input': spikes_input
-    })
-    return df_basic
 
         
 def mutual_info_plot(mutual_info: list, branching_ratios: list) -> None:

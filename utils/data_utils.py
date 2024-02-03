@@ -159,7 +159,7 @@ def raster_to_transmission(raster_df: pd.DataFrame) -> pd.DataFrame:
     neighbour_map = one_dim_neighbormap(max_distance, N)
 
     # Drop parameter columns
-    param_cols = ['max_distance', 'grid_size', 'random_connection', 'refractory_period', 'height', 'probability_of_spontaneous_activity']
+    param_cols = ['max_distance', 'grid_size', 'random_connection', 'refractory_period', 'threshold', 'probability_of_spontaneous_activity']
     df = df.drop(columns=param_cols)
 
     transmission = []
@@ -308,7 +308,7 @@ def raster_to_basic(df: pd.DataFrame) -> pd.DataFrame:
     """
     Convert the raster data to basic data:spikes_total, spikes_neighbours, spikes_input.
     """
-    params_columns = ['grid_size', 'height', 'max_distance', 'refractory_period', 
+    params_columns = ['grid_size','threshold', 'max_distance', 'refractory_period', 
                       'probability_of_spontaneous_activity', 'random_connection']
     df = df.drop(columns=params_columns, errors='ignore')
     spikes_total = df.apply(lambda row: (row == 2).sum() + (row == 1).sum(), axis=1)
@@ -362,7 +362,7 @@ def raster_to_basic(df: pd.DataFrame) -> pd.DataFrame:
     """
     Convert the raster data to basic data:spikes_total, spikes_neighbours, spikes_input.
     """
-    params_columns = ['grid_size', 'height', 'max_distance', 'refractory_period', 
+    params_columns = ['grid_size', 'threshold', 'max_distance', 'refractory_period', 
                       'probability_of_spontaneous_activity', 'random_connection']
     df = df.drop(columns=params_columns, errors='ignore')
     spikes_total = df.apply(lambda row: (row == 2).sum() + (row == 1).sum(), axis=1)
